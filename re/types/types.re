@@ -129,4 +129,5 @@ type transfer = {
 type entry =
   | Income income
   | Expense expense
+  | SubscriptionExpense subscriptionExpense
   | Transfer transfer;

@@ -6,8 +6,8 @@ type action =
   | Load Settings.settings;
 
 let updateSettings self settings => {
-  AsyncStorage.setItem "settings" (Settings.JSON.marshal settings) ();
-  self.ReasonReact.reduce (fun _ => Load settings) ()
+  AsyncStorage.setItem "settings" (settings |> Settings.JSON.marshal |> Js.Json.stringify) ();
+  self.ReasonReact.reduce (fun _state => Load settings) ()
 };
 
 let component = ReasonReact.reducerComponent "Root";
@@ -36,7 +36,7 @@ let make _children => {
     },
   render: fun self =>
     switch self.state.settings {
-    | Some _settings => <Text value="settings exist" />
+    | Some _settings => <Home />
     | None => <Welcome onCreate=(updateSettings self) />
     }
 };
