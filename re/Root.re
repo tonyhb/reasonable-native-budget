@@ -5,7 +5,10 @@ type state = {settings: option Settings.settings};
 type action =
   | Load Settings.settings;
 
-let updateSettings self settings => self.ReasonReact.reduce (fun _ => Load settings) ();
+let updateSettings self settings => {
+	AsyncStorage.setItem "settings" (Settings.JSON.marshal settings) ();
+	self.ReasonReact.reduce (fun _ => Load settings) ();
+};
 
 let component = ReasonReact.reducerComponent "Root";
 
@@ -19,7 +22,7 @@ let make _children => {
 		   switch optStore {
 		   | None => ()
 		   | Some string =>
-			 Js.Json.parseExn string |> Settings.MarshalJSON.unmarshal |> updateSettings self
+			 Js.Json.parseExn string |> Settings.JSON.unmarshal |> updateSettings self
 		   };
 		   Js.Promise.resolve ()
 		 }

@@ -9,7 +9,7 @@ type currencyType =
 
 let defaultCurrencyType = FiatCurrency {type_: "fiat", code: "USD"};
 
-module MarshalJSON = {
+module JSON = {
   let marshal item =>
     Json.Encode.(
       object_ (
@@ -22,9 +22,9 @@ module MarshalJSON = {
   let unmarshal json => {
     let item = Json.Decode.{type_: field "type" string json, code: field "code" string json};
     switch item.type_ {
-    | "fiat" => Some (FiatCurrency item)
-    | "crypto" => Some (CryptoCurrency item)
-    | _ => None
+    | "fiat" => FiatCurrency item
+    | "crypto" => CryptoCurrency item
+    | _ => defaultCurrencyType
     }
   };
 };
