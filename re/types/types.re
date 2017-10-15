@@ -83,17 +83,17 @@ type income = {
 };
 
 type subscriptionExpense = {
-	id: uuid,
-	subscription,
-	account,
-	category,
-	recipient,
-	currency: Currency.currency,
-	amountOut: float,
-	desciption: string,
-	date: int, /* The actual date of the transaction */
-	createdAt: int,
-	updatedAt: int
+  id: uuid,
+  subscription,
+  account,
+  category,
+  recipient,
+  currency: Currency.currency,
+  amountOut: float,
+  desciption: string,
+  date: int, /* The actual date of the transaction */
+  createdAt: int,
+  updatedAt: int
 };
 
 type expense = {
