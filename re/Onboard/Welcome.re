@@ -1,15 +1,20 @@
-
 open ReactNative;
 
 let comp = ReasonReact.statelessComponent "Welcome";
 
-let make _children => {
+let make ::onCreate _children => {
+  let onPressNew _event _self => {
+    let settings: Settings.settings = {defaultCurrency: Currency.defaultCurrencyType};
+    onCreate settings;
+    ()
+  };
+  {
     ...comp,
-    render: fun _self => {
-        <View>
-            <Button title="Get started">
-                <Text value="Welcome!" />    
-            </Button>
-        </View>
-    }
-}
+    render: fun self =>
+      <View>
+        <Button onPress=(self.handle onPressNew) title="Get started">
+          <Text value="Welcome!" />
+        </Button>
+      </View>
+  }
+};
