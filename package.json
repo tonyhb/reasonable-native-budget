@@ -1,0 +1,29 @@
+{
+  "name": "budget",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "babel-preset-react-native-stage-0": "^1.0.1",
+    "jest-expo": "^21.0.2",
+    "react-test-renderer": "16.0.0"
+  },
+  "scripts": {
+    "build": "bsb -make-world -clean-world",
+    "watch": "bsb -make-world -clean-world -w",
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "test": "node node_modules/jest/bin/jest.js --watch"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "bs-json": "^0.2.3",
+    "bs-platform": "^1.9.3",
+    "bs-react-native": "^0.2.1",
+    "react": "16.0.0",
+    "react-native": "0.49.3",
+    "reason-react": "^0.2.4"
+  }
+}
