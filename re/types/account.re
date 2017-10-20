@@ -16,20 +16,31 @@ type printableAccount = {
 
 let typeArray = [|
   {text: "Cash", type_: Cash},
-  {text: "Checking", type_: Checking},
+  {text: "Checking account", type_: Checking},
   {text: "Credit card", type_: CreditCard None},
-  {text: "Savings", type_: Savings},
+  {text: "Savings account", type_: Savings},
   {text: "IRA", type_: IRA ""},
   {text: "401k", type_: Retirement},
   {text: "Cryptocurrency", type_: Crypto},
   {text: "Other", type_: Other ""}
 |];
 
+let printableAccountName _type =>
+  switch (typeArray |> Js.Array.find (fun item => item.type_ == _type)) {
+  | Some f => f.text
+  | None =>
+    switch _type {
+    /* This can hit if typeArray is not exhaustive or we have a (CreditCard Some "foo")*/
+    | CreditCard (Some cardType) => cardType
+    | _ => "Other"
+    }
+  };
+
+
+/** TODO: This should depend on currency */
 type account = {
-  id: Types.uuid,
+  id: string,
   accountType,
   balance: float,
-  name: string,
-  business: option string, /* ie. Chase */
-  openedOn: option int
+  name: string
 };

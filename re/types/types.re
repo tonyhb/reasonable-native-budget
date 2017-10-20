@@ -1,23 +1,5 @@
 type uuid = string;
 
-type accountType =
-  | Cash
-  | Checking
-  | Savings
-  | Credit
-  | Roth
-  | Retirement
-  | Crypto
-  | Forex
-  | Other;
-
-type account = {
-  id: uuid,
-  name: string,
-  accountType,
-  balance: float
-};
-
 type category =
   | Income string
   /* categories for expenses */
@@ -28,6 +10,8 @@ type category =
   | House string /* mortgage, rent */
   | Utilities string
   | Medical string
+  | Education string
+  | Loans string
   | Pet string
   | Household string
   | Auto string
@@ -53,7 +37,7 @@ type subscription = {
   name: string,
   description: string,
   amount: float,
-  account, /* The account that this will be debited from */
+  account: Account.account, /* The account that this will be debited from */
   currency: Currency.currency, /* The currency that the subscription is in */
   occurence, /* How often this subscription occurs */
   category /* A category for the subscription expense */
@@ -85,7 +69,7 @@ type income = {
 type subscriptionExpense = {
   id: uuid,
   subscription,
-  account,
+  account: Account.account,
   category,
   recipient,
   currency: Currency.currency,
@@ -98,7 +82,7 @@ type subscriptionExpense = {
 
 type expense = {
   id: uuid,
-  account,
+  account: Account.account,
   category,
   recipient,
   currency: Currency.currency,
@@ -114,8 +98,8 @@ type expense = {
 
 type transfer = {
   id: uuid,
-  fromAccount: account,
-  toAccount: account,
+  fromAccount: Account.account,
+  toAccount: Account.account,
   fromCurrency: Currency.currency,
   toCurrency: Currency.currency,
   amount: float,

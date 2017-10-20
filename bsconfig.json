@@ -5,6 +5,7 @@
   },
   "bsc-flags": ["-bs-super-errors"],
   "bs-dependencies": ["bs-react-native", "reason-react", "bs-json", "bs-react-navigation"],
+  "bs-super-errors": true,
   "sources": [{
     "dir": "re",
     "subdirs": true
