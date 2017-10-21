@@ -1,11 +1,11 @@
-type currency = {
+type t = {
   type_: string,
   code: string
 };
 
 type currencyType =
-  | FiatCurrency currency
-  | CryptoCurrency currency;
+  | FiatCurrency t
+  | CryptoCurrency t;
 
 let defaultCurrencyType = FiatCurrency {type_: "fiat", code: "USD"};
 

@@ -21,7 +21,7 @@ module OnboadringAccountPreview = {
             <Text style=styles##info value=("$" ^ string_of_float balance) />
           </View>
           <View style=styles##row>
-            <Text style=styles##_type value=(Account.printableAccountName accountType) />
+            <Text style=styles##_type value=(Account.string_of_accountType accountType) />
           </View>
         </Card.Content>
       </Card>
@@ -43,18 +43,20 @@ module OnboardingAccount = {
       );
   type state = {
     editing: bool,
-    account: Account.account
+    account: Account.t
   };
   type action =
     | ToggleEdit bool
     | UpdateName string
     | UpdateType Account.accountType
-    | UpdateBalance float
-    | UpdateCardType string;
+    | UpdateBalance float;
   let c = ReasonReact.reducerComponent "OnboardingAccount";
   let make ::name ::accountType _children => {
     ...c,
-    initialState: fun () => {account: {id: "", accountType, balance: 100., name}, editing: false},
+    initialState: fun () => {
+      account: {id: "", name, balance: 100., currency: Currency.defaultCurrencyType, accountType},
+      editing: false
+    },
     reducer: fun action state =>
       switch action {
       | ToggleEdit editing => ReasonReact.Update {...state, editing}
@@ -63,11 +65,6 @@ module OnboardingAccount = {
         ReasonReact.Update {...state, account: {...state.account, accountType}}
       | UpdateBalance balance =>
         ReasonReact.Update {...state, account: {...state.account, balance}}
-      | UpdateCardType _type =>
-        ReasonReact.Update {
-          ...state,
-          account: {...state.account, accountType: Account.CreditCard (Some _type)}
-        }
       },
     render: fun self =>
       switch self.state.editing {
@@ -100,15 +97,17 @@ module OnboardingAccount = {
             <Form.Field>
               <Form.Label value="Account type" />
               <Form.Picker
-                onValueChange=(self.reduce (fun type_ => UpdateType type_))
-                selectedValue=self.state.account.accountType>
+                onValueChange=(
+                  self.reduce (fun type_ => UpdateType (Account.accountType_of_string type_))
+                )
+                selectedValue=(Account.string_of_accountType self.state.account.accountType)>
                 (
-                  Account.typeArray
+                  Account.accountDefaults
                   |> Js.Array.map (
                        fun pa =>
                          <Picker.Item
                            key=pa.Account.text
-                           value=pa.Account.type_
+                           value=pa.Account.text
                            label=pa.Account.text
                            color="#528060"
                          />
@@ -182,9 +181,18 @@ let make ::onCreate _children => {
             style=(StyleSheet.flatten [styles##small, styles##hint])
             value="Tap to edit or remove"
           />
-          <OnboardingAccount name="My checking account" accountType=Account.Checking />
-          <OnboardingAccount name="Savings city" accountType=Account.Savings />
-          <OnboardingAccount name="Credit card central" accountType=(Account.CreditCard None) />
+          <OnboardingAccount
+            name="My checking account"
+            accountType=(Account.Checking Account.Checking.default)
+          />
+          <OnboardingAccount
+            name="Savings city"
+            accountType=(Account.Savings Account.Savings.default)
+          />
+          <OnboardingAccount
+            name="Credit card central"
+            accountType=(Account.CreditCard Account.CreditCard.default)
+          />
           <TouchableOpacity>
             <Text style=(StyleSheet.flatten [styles##add, styles##small]) value="Add another" />
           </TouchableOpacity>

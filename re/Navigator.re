@@ -13,13 +13,6 @@ let routes: StackNavigatorRe.routes string {.} =
         "Home",
         route
           screen::(fun {navigation} => home navigation) navigationOptions::(`static navOptions) ()
-      ),
-      (
-        "NewAccount",
-        route
-          screen::(fun {navigation} => <YourAccounts.NewAccount />)
-          navigationOptions::(`static navOptions)
-          ()
       )
     ]
   );

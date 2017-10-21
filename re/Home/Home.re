@@ -19,6 +19,6 @@ let make nav::(nav: ReactNavigation.Navigation.t {.}) _children => {
   render: fun _self =>
     <View style=styles##wrapper>
       <View style=styles##header />
-      <View style=styles##content> <YourEntries.Card nav /> <YourAccounts.Card nav /> </View>
+      <View style=styles##content />
     </View>
 };

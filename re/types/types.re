@@ -37,8 +37,8 @@ type subscription = {
   name: string,
   description: string,
   amount: float,
-  account: Account.account, /* The account that this will be debited from */
-  currency: Currency.currency, /* The currency that the subscription is in */
+  account: Account.t, /* The account that this will be debited from */
+  currency: Currency.currencyType, /* The currency that the subscription is in */
   occurence, /* How often this subscription occurs */
   category /* A category for the subscription expense */
 };
@@ -69,10 +69,10 @@ type income = {
 type subscriptionExpense = {
   id: uuid,
   subscription,
-  account: Account.account,
+  account: Account.t,
   category,
   recipient,
-  currency: Currency.currency,
+  currency: Currency.currencyType,
   amountOut: float,
   desciption: string,
   date: int, /* The actual date of the transaction */
@@ -82,10 +82,10 @@ type subscriptionExpense = {
 
 type expense = {
   id: uuid,
-  account: Account.account,
+  account: Account.t,
   category,
   recipient,
-  currency: Currency.currency,
+  currency: Currency.currencyType,
   amountOut: float,
   description: string,
   expensable: bool,
@@ -98,10 +98,10 @@ type expense = {
 
 type transfer = {
   id: uuid,
-  fromAccount: Account.account,
-  toAccount: Account.account,
-  fromCurrency: Currency.currency,
-  toCurrency: Currency.currency,
+  fromAccount: Account.t,
+  toAccount: Account.t,
+  fromCurrency: Currency.currencyType,
+  toCurrency: Currency.currencyType,
   amount: float,
   description: string,
   category,
