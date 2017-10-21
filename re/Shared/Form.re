@@ -48,7 +48,12 @@ module TextInput = {
         }
       );
   let c = ReasonReact.statelessComponent "TextInput";
-  let make ::value ::onChangeText ::selectTextOnFocus=false _children => {
+  let make
+      style::(style: option StyleRe.t)=None
+      ::value
+      ::onChangeText
+      ::selectTextOnFocus=false
+      _children => {
     ...c,
     render: fun _self =>
       <ReactNative.TextInput
@@ -56,7 +61,12 @@ module TextInput = {
         onChangeText
         value
         selectTextOnFocus
-        style=styles##input
+        style=(
+          switch style {
+          | Some s => StyleSheet.flatten [styles##input, s]
+          | None => styles##input
+          }
+        )
       />
   };
 };
@@ -73,7 +83,12 @@ module MoneyInput = {
   /* with retained props as the blur handler calls a prop which passes new props -
      the formatted string */
   let c = ReasonReact.reducerComponent "Form.MoneyInput";
-  let make ::value ::onChangeFloat ::selectTextOnFocus=false _children => {
+  let make
+      style::(style: option StyleRe.t)=None
+      ::value
+      ::onChangeFloat
+      ::selectTextOnFocus=false
+      _children => {
     let handleBlur _evt self => {
       let regex = [%bs.re "/[^0-9.]/g"];
       self.ReasonReact.state |> Js.String.replaceByRe regex "" |> float_of_string |> onChangeFloat
@@ -82,18 +97,23 @@ module MoneyInput = {
       ...c,
       willReceiveProps: fun _self => value,
       initialState: fun () => value,
-      reducer: fun action state =>
+      reducer: fun action _state =>
         switch action {
         | Change value => ReasonReact.Update value
         },
       render: fun self =>
         <ReactNative.TextInput
-          style=TextInput.styles##input
           keyboardType=`numeric
           value=self.state
           selectTextOnFocus
           onChangeText=(self.reduce (fun text => Change text))
           onBlur=(self.handle handleBlur)
+          style=(
+            switch style {
+            | Some s => StyleSheet.flatten [TextInput.styles##input, s]
+            | None => TextInput.styles##input
+            }
+          )
         />
     }
   };

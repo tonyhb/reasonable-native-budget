@@ -15,12 +15,12 @@ type printableAccount = {
 };
 
 let typeArray = [|
+  {text: "401k", type_: Retirement},
   {text: "Cash", type_: Cash},
   {text: "Checking account", type_: Checking},
   {text: "Credit card", type_: CreditCard None},
   {text: "Savings account", type_: Savings},
   {text: "IRA", type_: IRA ""},
-  {text: "401k", type_: Retirement},
   {text: "Cryptocurrency", type_: Crypto},
   {text: "Other", type_: Other ""}
 |];
