@@ -116,6 +116,25 @@ module OnboardingAccount = {
                 )
               </Form.Picker>
             </Form.Field>
+            (
+              switch self.state.account.accountType {
+              | Account.CreditCard cc =>
+                <Form.Field>
+                  <Form.Label value="Card type (eg. Sapphire Reserve)" />
+                  <Form.TextInput
+                    onChangeText=(self.reduce (fun text => UpdateName text))
+                    value=(
+                      switch cc.type_ {
+                      | Some t => t
+                      | None => ""
+                      }
+                    )
+                    selectTextOnFocus=true
+                  />
+                </Form.Field>
+              | _ => <View />
+              }
+            )
           </Card.Content>
         </Card>
       }
