@@ -33,9 +33,6 @@ module OnboadringAccountPreview = {
 
 /* OnboardingAccount is used to create accounts during onboarding */
 module OnboardingAccount = {
-  Js.log (Random.int 15);
-  let handleUpdateBalance text::(text_: string) =>
-    text_ |> Js.String.replace "$" "" |> float_of_string;
   let styles =
     StyleSheet.create
       Style.(
@@ -55,7 +52,7 @@ module OnboardingAccount = {
     | UpdateType Account.accountType
     | UpdateBalance float;
   let c = ReasonReact.reducerComponent "OnboardingAccount";
-  let make ::account _children => {
+  let make ::onSave ::onRemove ::account _children => {
     ...c,
     initialState: fun () => {account, editing: false},
     reducer: fun action state =>
@@ -127,8 +124,11 @@ module OnboardingAccount = {
                         paddingRight 15.
                       ]
                     )>
-              <Form.DestructiveButton value="Remove" onPress=(fun _ => ()) />
-              <Form.PrimaryButton value="Save" onPress=(fun _ => ()) />
+              <Form.DestructiveButton value="Remove" onPress=(fun _e => onRemove account) />
+              <Form.PrimaryButton value="Save" onPress=(self.reduce (fun _e => {
+                onSave self.state.account;
+                (ToggleEdit false);
+              })) />
             </View>
           </Card.Content>
         </Card>
@@ -215,7 +215,7 @@ let make ::onSubmit _children => {
     switch action {
     | Remove item =>
       ReasonReact.Update {
-        accounts: state.accounts |> List.filter (fun acc => acc === item ? true : false)
+        accounts: state.accounts |> List.filter (fun acc => acc !== item)
       }
     | Update item =>
       ReasonReact.SilentUpdate {
@@ -251,7 +251,15 @@ let make ::onSubmit _children => {
         />
         (
           self.state.accounts
-          |> List.map (fun acc => <OnboardingAccount key=acc.Account.id account=acc />)
+          |> List.map (
+               fun acc =>
+                 <OnboardingAccount
+                   key=acc.Account.id
+                   account=acc
+                   onSave=(self.reduce (fun acct => Update acct))
+                   onRemove=(self.reduce (fun acct => Remove acct))
+                 />
+             )
           |> Array.of_list
           |> ReasonReact.arrayToElement
         )
