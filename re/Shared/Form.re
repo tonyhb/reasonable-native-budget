@@ -1,5 +1,53 @@
 open ReactNative;
 
+module Button = {
+  let styles =
+    StyleSheet.create
+      Style.(
+        {
+          "text":
+            style [
+              fontFamily "LFTEtica",
+              color "#6AA67D",
+              textDecorationLine `underline,
+              padding 10.
+            ]
+        }
+      );
+  let c = ReasonReact.statelessComponent "Form.Button";
+  let make value::(value: string) ::onPress ::style=? _children => {
+    ...c,
+    render: fun _self =>
+      <TouchableOpacity onPress>
+        <Text
+          style=(
+            switch style {
+            | Some s => StyleSheet.flatten [styles##text, s]
+            | None => styles##text
+            }
+          )
+          value
+        />
+      </TouchableOpacity>
+  };
+};
+
+module PrimaryButton = {
+  let c = ReasonReact.statelessComponent "Form.DesructiveButton";
+  let make value::(value: string) ::onPress _children => {
+    ...c,
+    render: fun _self => <Button value onPress style=Style.(style [fontFamily "LFTEtica-Bold"]) />
+  };
+};
+
+module DestructiveButton = {
+  let c = ReasonReact.statelessComponent "Form.DesructiveButton";
+  let make value::(value: string) ::onPress _children => {
+    ...c,
+    render: fun _self => <Button value onPress style=Style.(style [color "#A92B3A"]) />
+  };
+};
+
 module Field = {
   let styles =
     StyleSheet.create Style.({"field": style [flexDirection `column, paddingBottom 20.]});
@@ -19,7 +67,7 @@ module Label = {
   let styles =
     StyleSheet.create
       Style.(
-        {"label": style [fontFamily "LTFEtica", color "#A1A6A6", letterSpacing 1., fontSize 10.]}
+        {"label": style [fontFamily "LFTEtica", color "#A1A6A6", letterSpacing 1., fontSize 10.]}
       );
   let c = ReasonReact.statelessComponent "Form.Label";
   let make ::value _children => {
@@ -35,7 +83,7 @@ module TextInput = {
         {
           "input":
             style [
-              fontFamily "LTFEtica",
+              fontFamily "LFTEtica",
               fontSize 14.0,
               color "#528060",
               borderBottomWidth 2.,
@@ -125,7 +173,7 @@ module Picker = {
       Style.(
         {
           "picker": style [borderBottomWidth 2., borderBottomColor "#EBEBEB", padding 0.],
-          "item": style [fontFamily "LTFEtica"]
+          "item": style [fontFamily "LFTEtica"]
         }
       );
   let c = ReasonReact.statelessComponent "Form.Picker";

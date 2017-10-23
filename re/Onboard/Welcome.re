@@ -5,23 +5,26 @@ module OnboadringAccountPreview = {
     StyleSheet.create
       Style.(
         {
-          "info": style [fontFamily "LTFEtica", fontSize 20., color "#528060", marginBottom 2.],
-          "_type": style [fontFamily "LTFEtica", fontSize 12., color "#85A58F"],
+          "info": style [fontFamily "LFTEtica", fontSize 20., color "#528060", marginBottom 2.],
+          "_type": style [fontFamily "LFTEtica", fontSize 12., color "#85A58F"],
           "row": style [flexDirection `row, justifyContent `spaceBetween]
         }
       );
   let c = ReasonReact.statelessComponent "OnboardingAccountPreview";
-  let make ::name ::accountType ::balance _children => {
+  let make ::account _children => {
     ...c,
     render: fun _self =>
       <Card>
         <Card.Content>
           <View style=styles##row>
-            <Text style=styles##info value=name />
-            <Text style=styles##info value=("$" ^ string_of_float balance) />
+            <Text style=styles##info value=account.Account.name />
+            <Text style=styles##info value=("$" ^ Printf.sprintf "%.2f" account.Account.balance) />
           </View>
           <View style=styles##row>
-            <Text style=styles##_type value=(Account.string_of_accountType accountType) />
+            <Text
+              style=styles##_type
+              value=(Account.string_of_accountType account.Account.accountType)
+            />
           </View>
         </Card.Content>
       </Card>
@@ -30,14 +33,15 @@ module OnboadringAccountPreview = {
 
 /* OnboardingAccount is used to create accounts during onboarding */
 module OnboardingAccount = {
+  Js.log (Random.int 15);
   let handleUpdateBalance text::(text_: string) =>
     text_ |> Js.String.replace "$" "" |> float_of_string;
   let styles =
     StyleSheet.create
       Style.(
         {
-          "info": style [fontFamily "LTFEtica", fontSize 20., color "#528060", marginBottom 2.],
-          "_type": style [fontFamily "LTFEtica", fontSize 12., color "#85A58F"],
+          "info": style [fontFamily "LFTEtica", fontSize 20., color "#528060", marginBottom 2.],
+          "_type": style [fontFamily "LFTEtica", fontSize 12., color "#85A58F"],
           "row": style [flexDirection `row, justifyContent `spaceBetween]
         }
       );
@@ -51,12 +55,9 @@ module OnboardingAccount = {
     | UpdateType Account.accountType
     | UpdateBalance float;
   let c = ReasonReact.reducerComponent "OnboardingAccount";
-  let make ::name ::accountType _children => {
+  let make ::account _children => {
     ...c,
-    initialState: fun () => {
-      account: {id: "", name, balance: 100., currency: Currency.defaultCurrencyType, accountType},
-      editing: false
-    },
+    initialState: fun () => {account, editing: false},
     reducer: fun action state =>
       switch action {
       | ToggleEdit editing => ReasonReact.Update {...state, editing}
@@ -66,11 +67,12 @@ module OnboardingAccount = {
       | UpdateBalance balance =>
         ReasonReact.Update {...state, account: {...state.account, balance}}
       },
-    render: fun self =>
+    render: fun self => {
+      let {account} = self.state;
       switch self.state.editing {
       | false =>
         <TouchableOpacity onPress=(self.reduce (fun _evt => ToggleEdit true))>
-          <OnboadringAccountPreview name accountType balance=self.state.account.balance />
+          <OnboadringAccountPreview account />
         </TouchableOpacity>
       | true =>
         <Card>
@@ -88,7 +90,7 @@ module OnboardingAccount = {
                 <Form.Label value="Starting Balance" />
                 <Form.MoneyInput
                   onChangeFloat=(self.reduce (fun value => UpdateBalance value))
-                  value=("$" ^ string_of_float self.state.account.balance)
+                  value=("$" ^ Printf.sprintf "%.2f" self.state.account.balance)
                   selectTextOnFocus=true
                   style=(Some Style.(style [textAlign `right]))
                 />
@@ -116,28 +118,23 @@ module OnboardingAccount = {
                 )
               </Form.Picker>
             </Form.Field>
-            (
-              switch self.state.account.accountType {
-              | Account.CreditCard cc =>
-                <Form.Field>
-                  <Form.Label value="Card type (eg. Sapphire Reserve)" />
-                  <Form.TextInput
-                    onChangeText=(self.reduce (fun text => UpdateName text))
-                    value=(
-                      switch cc.type_ {
-                      | Some t => t
-                      | None => ""
-                      }
-                    )
-                    selectTextOnFocus=true
-                  />
-                </Form.Field>
-              | _ => <View />
-              }
-            )
+            <View
+              style=Style.(
+                      style [
+                        flexDirection `row,
+                        justifyContent `spaceBetween,
+                        paddingLeft 15.,
+                        paddingRight 15.
+                      ]
+                    )>
+              <Form.DestructiveButton value="Remove" onPress=(fun _ => ()) />
+              <Form.PrimaryButton value="Save" onPress=(fun _ => ()) />
+            </View>
           </Card.Content>
         </Card>
+      /* Common account elements */
       }
+    }
   };
 };
 
@@ -178,44 +175,89 @@ let styles =
       }
     );
 
-let comp = ReasonReact.statelessComponent "Welcome";
+type state = {accounts: list Account.t};
 
-let make ::onCreate _children => {
-  let onPressNew _event _self => {
-    let settings: Settings.settings = {defaultCurrency: Currency.defaultCurrencyType};
-    onCreate settings;
-    ()
-  };
-  {
-    ...comp,
-    render: fun _self =>
-      <ScrollView style=styles##wrapper contentContainerStyle=styles##wrapperInner>
-        <View style=styles##header />
-        <View>
-          <Text style=styles##title value="Let's get started!" />
-          <Text style=styles##subtitle value="First, let's add some accounts\nto your budget." />
-        </View>
-        <View style=styles##content>
-          <Text
-            style=(StyleSheet.flatten [styles##small, styles##hint])
-            value="Tap to edit or remove"
-          />
-          <OnboardingAccount
-            name="My checking account"
-            accountType=(Account.Checking Account.Checking.default)
-          />
-          <OnboardingAccount
-            name="Savings city"
-            accountType=(Account.Savings Account.Savings.default)
-          />
-          <OnboardingAccount
-            name="Credit card central"
-            accountType=(Account.CreditCard Account.CreditCard.default)
-          />
-          <TouchableOpacity>
-            <Text style=(StyleSheet.flatten [styles##add, styles##small]) value="Add another" />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-  }
+type actions =
+  | Remove Account.t
+  | Update Account.t
+  | Add;
+
+let comp = ReasonReact.reducerComponent "Welcome";
+
+let make ::onSubmit _children => {
+  ...comp,
+  initialState: fun () => {
+    accounts: [
+      {
+        id: Uuid.gen (),
+        balance: 100.,
+        name: "My checking account",
+        currency: Currency.defaultCurrencyType,
+        accountType: Account.Checking Account.Checking.default
+      },
+      {
+        id: Uuid.gen (),
+        balance: 100.,
+        name: "Credit Card",
+        currency: Currency.defaultCurrencyType,
+        accountType: Account.CreditCard Account.CreditCard.default
+      },
+      {
+        id: Uuid.gen (),
+        balance: 100.,
+        name: "Savings",
+        currency: Currency.defaultCurrencyType,
+        accountType: Account.Savings Account.Savings.default
+      }
+    ]
+  },
+  reducer: fun action state =>
+    switch action {
+    | Remove item =>
+      ReasonReact.Update {
+        accounts: state.accounts |> List.filter (fun acc => acc === item ? true : false)
+      }
+    | Update item =>
+      ReasonReact.SilentUpdate {
+        accounts:
+          state.accounts |> List.map (fun acc => acc.Account.id == item.Account.id ? item : acc)
+      }
+    | Add =>
+      ReasonReact.Update {
+        accounts:
+          [
+            {
+              Account.id: Uuid.gen (),
+              balance: 0.,
+              name: "Another account",
+              currency: Currency.defaultCurrencyType,
+              accountType: Account.Checking Account.Checking.default
+            }
+          ]
+          |> List.append state.accounts
+      }
+    },
+  render: fun self =>
+    <ScrollView style=styles##wrapper contentContainerStyle=styles##wrapperInner>
+      <View style=styles##header />
+      <View>
+        <Text style=styles##title value="Let's get started!" />
+        <Text style=styles##subtitle value="First, let's add some accounts\nto your budget." />
+      </View>
+      <View style=styles##content>
+        <Text
+          style=(StyleSheet.flatten [styles##small, styles##hint])
+          value="Tap to edit or remove"
+        />
+        (
+          self.state.accounts
+          |> List.map (fun acc => <OnboardingAccount key=acc.Account.id account=acc />)
+          |> Array.of_list
+          |> ReasonReact.arrayToElement
+        )
+        <TouchableOpacity onPress=(self.reduce (fun _ev => Add))>
+          <Text style=(StyleSheet.flatten [styles##add, styles##small]) value="Add another" />
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
 };

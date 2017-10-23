@@ -37,7 +37,7 @@ let make _children => {
   render: fun self =>
     switch self.state.settings {
     /*| Some _settings => <Navigator />*/
-    | Some _settings => <Welcome onCreate=(updateSettings self) />
-    | None => <Welcome onCreate=(updateSettings self) />
+    | Some _settings => <Welcome onSubmit=(updateSettings self) />
+    | None => <Welcome onSubmit=(updateSettings self) />
     }
 };
