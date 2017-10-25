@@ -125,10 +125,17 @@ module OnboardingAccount = {
                       ]
                     )>
               <Form.DestructiveButton value="Remove" onPress=(fun _e => onRemove account) />
-              <Form.PrimaryButton value="Save" onPress=(self.reduce (fun _e => {
-                onSave self.state.account;
-                (ToggleEdit false);
-              })) />
+              <Form.PrimaryButton
+                value="Save"
+                onPress=(
+                  self.reduce (
+                    fun _e => {
+                      onSave self.state.account;
+                      ToggleEdit false
+                    }
+                  )
+                )
+              />
             </View>
           </Card.Content>
         </Card>
@@ -193,30 +200,28 @@ let make ::onSubmit _children => {
         balance: 100.,
         name: "My checking account",
         currency: Currency.defaultCurrencyType,
-        accountType: Account.Checking Account.Checking.default
+        accountType: Account.Checking Checking.default
       },
       {
         id: Uuid.gen (),
         balance: 100.,
         name: "Credit Card",
         currency: Currency.defaultCurrencyType,
-        accountType: Account.CreditCard Account.CreditCard.default
+        accountType: Account.CreditCard CreditCard.default
       },
       {
         id: Uuid.gen (),
         balance: 100.,
         name: "Savings",
         currency: Currency.defaultCurrencyType,
-        accountType: Account.Savings Account.Savings.default
+        accountType: Account.Savings Savings.default
       }
     ]
   },
   reducer: fun action state =>
     switch action {
     | Remove item =>
-      ReasonReact.Update {
-        accounts: state.accounts |> List.filter (fun acc => acc !== item)
-      }
+      ReasonReact.Update {accounts: state.accounts |> List.filter (fun acc => acc !== item)}
     | Update item =>
       ReasonReact.SilentUpdate {
         accounts:
@@ -231,7 +236,7 @@ let make ::onSubmit _children => {
               balance: 0.,
               name: "Another account",
               currency: Currency.defaultCurrencyType,
-              accountType: Account.Checking Account.Checking.default
+              accountType: Account.Checking Checking.default
             }
           ]
           |> List.append state.accounts

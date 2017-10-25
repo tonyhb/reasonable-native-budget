@@ -1,53 +1,9 @@
-type rewardsType =
-  | Cashback float
-  | Points
-  | Miles;
-
-type taxType =
-  | Roth
-  | Traditional;
-
-module Cash = {};
-
-module Checking = {
-  type t = {bank: option string};
-  let default = {bank: None};
-};
-
-module Savings = {
-  type t = {
-    bank: option string,
-    interest: float
-  };
-  let default = {bank: None, interest: 0.01};
-};
-
-module CreditCard = {
-  type t = {
-    type_: option string,
-    apr: float,
-    openedOn: int,
-    rewardsType
-  };
-  let default = {type_: None, apr: 0., openedOn: 0, rewardsType: Cashback 0.01};
-};
-
-module IRA = {
-  type t = {taxType};
-  let default = {taxType: Traditional};
-};
-
-module Retirement = {
-  type t = {taxType};
-  let default = {taxType: Traditional};
-};
-
 type accountType =
   | Cash
   | Checking Checking.t
   | Savings Savings.t
   | CreditCard CreditCard.t
-  | IRA IRA.t
+  | IRA Ira.t
   | Retirement Retirement.t
   | Crypto
   | Other string;
@@ -64,24 +20,71 @@ type t = {
 
 let string_of_accountType =
   fun
-  | Cash => "Cash"
-  | Checking _s => "Checking account"
-  | Savings _s => "Savings account"
-  | CreditCard _s => "Credit card"
-  | IRA _s => "IRA"
-  | Retirement _s => "401k"
-  | Crypto => "Cryptocurrency"
+  | Cash => Cash.name
+  | Checking _s => Checking.name
+  | Savings _s => Savings.name
+  | CreditCard _s => CreditCard.name
+  | IRA _s => Ira.name
+  | Retirement _s => Retirement.name
+  | Crypto => Crypto.name
   | Other _s => "Other";
+
+module JSON = {
+  /* BS Json */
+  let marshal item =>
+    Json.Encode.(
+      object_ [
+        ("id", string item.id),
+        ("name", string item.name),
+        ("balance", Json.Encode.float item.balance),
+        ("currency", Currency.JSON.marshal item.currency),
+        ("type", string (string_of_accountType item.accountType)),
+        (
+          "data",
+          switch item.accountType {
+          | Cash => Js.Json.null
+          | Checking t => Checking.JSON.marshal t
+          | Savings t => Savings.JSON.marshal t
+          | CreditCard t => CreditCard.JSON.marshal t
+          | IRA t => Ira.JSON.marshal t
+          | Retirement t => Retirement.JSON.marshal t
+          | Crypto => Js.Json.null
+          | Other s => string s
+          }
+        )
+      ]
+    );
+  let unmarshal json =>
+    Json.Decode.{
+      id: json |> field "id" string,
+      balance: json |> field "balance" Json.Decode.float,
+      name: json |> field "name" string,
+      currency: json |> field "currency" Currency.JSON.unmarshal,
+      accountType:
+        switch (json |> field "type" string) {
+        | s when s == Cash.name => Cash
+        | s when s == Checking.name => Checking (json |> field "data" Checking.JSON.unmarshal)
+        | s when s == CreditCard.name =>
+          CreditCard (json |> field "data" CreditCard.JSON.unmarshal)
+        | s when s == Savings.name => Savings (json |> field "data" Savings.JSON.unmarshal)
+        | s when s == Ira.name => IRA (json |> field "data" Ira.JSON.unmarshal)
+        | s when s == Retirement.name =>
+          Retirement (json |> field "data" Retirement.JSON.unmarshal)
+        | s when s == Crypto.name => Crypto
+        | s => Other s
+        }
+    };
+};
 
 let accountType_of_string =
   fun
-  | "Cash" => Cash
-  | "Checking account" => Checking Checking.default
-  | "Credit card" => CreditCard CreditCard.default
-  | "Savings account" => Savings Savings.default
-  | "IRA" => IRA IRA.default
-  | "401k" => Retirement Retirement.default
-  | "Cryptocurrency" => Crypto
+  | s when s == Cash.name => Cash
+  | s when s == Checking.name => Checking Checking.default
+  | s when s == CreditCard.name => CreditCard CreditCard.default
+  | s when s == Savings.name => Savings Savings.default
+  | s when s == Ira.name => IRA Ira.default
+  | s when s == Retirement.name => Retirement Retirement.default
+  | s when s == Crypto.name => Crypto
   | other => Other other;
 
 type accountTypeLabel = {
@@ -90,12 +93,12 @@ type accountTypeLabel = {
 };
 
 let accountDefaults = [|
-  {text: "Cash", type_: Cash},
-  {text: "Checking account", type_: Checking Checking.default},
-  {text: "Credit card", type_: CreditCard CreditCard.default},
-  {text: "Savings account", type_: Savings Savings.default},
-  {text: "IRA", type_: IRA IRA.default},
-  {text: "401k", type_: Retirement Retirement.default},
-  {text: "Cryptocurrency", type_: Crypto},
+  {text: Cash.name, type_: Cash},
+  {text: Checking.name, type_: Checking Checking.default},
+  {text: CreditCard.name, type_: CreditCard CreditCard.default},
+  {text: Savings.name, type_: Savings Savings.default},
+  {text: Ira.name, type_: IRA Ira.default},
+  {text: Retirement.name, type_: Retirement Retirement.default},
+  {text: Crypto.name, type_: Crypto},
   {text: "Other", type_: Other ""}
 |];
