@@ -45,6 +45,6 @@ module JSON = {
       type_: json |> optional (field "type" string),
       apr: json |> field "apr" Json.Decode.float,
       openedOn: json |> field "openedOn" Json.Decode.int,
-      rewardsType: json |> field "type" unmarshalRewards
+      rewardsType: json |> field "rewardsType" unmarshalRewards
     };
 };

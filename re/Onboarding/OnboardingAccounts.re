@@ -39,7 +39,16 @@ module OnboardingAccount = {
         {
           "info": style [fontFamily "LFTEtica", fontSize 20., color "#528060", marginBottom 2.],
           "_type": style [fontFamily "LFTEtica", fontSize 12., color "#85A58F"],
-          "row": style [flexDirection `row, justifyContent `spaceBetween]
+          "row": style [flexDirection `row, justifyContent `spaceBetween],
+          "buttonWrapper":
+            style [
+              flexDirection `row,
+              justifyContent `spaceBetween,
+              paddingLeft 15.,
+              paddingRight 15.,
+              marginTop (-15.),
+              marginBottom (-5.)
+            ]
         }
       );
   type state = {
@@ -115,18 +124,10 @@ module OnboardingAccount = {
                 )
               </Form.Picker>
             </Form.Field>
-            <View
-              style=Style.(
-                      style [
-                        flexDirection `row,
-                        justifyContent `spaceBetween,
-                        paddingLeft 15.,
-                        paddingRight 15.
-                      ]
-                    )>
+            <View style=styles##buttonWrapper>
               <Form.DestructiveButton value="Remove" onPress=(fun _e => onRemove account) />
               <Form.PrimaryButton
-                value="Save"
+                value="OK"
                 onPress=(
                   self.reduce (
                     fun _e => {
@@ -185,92 +186,152 @@ let styles =
 type state = {accounts: list Account.t};
 
 type actions =
+  | Load (list Account.t)
   | Remove Account.t
   | Update Account.t
   | Add;
 
-let comp = ReasonReact.reducerComponent "Welcome";
+let comp = ReasonReact.reducerComponent "OnboardingAccounts";
 
-let make ::onSubmit _children => {
-  ...comp,
-  initialState: fun () => {
-    accounts: [
-      {
-        id: Uuid.gen (),
-        balance: 100.,
-        name: "My checking account",
-        currency: Currency.defaultCurrencyType,
-        accountType: Account.Checking Checking.default
-      },
-      {
-        id: Uuid.gen (),
-        balance: 100.,
-        name: "Credit Card",
-        currency: Currency.defaultCurrencyType,
-        accountType: Account.CreditCard CreditCard.default
-      },
-      {
-        id: Uuid.gen (),
-        balance: 100.,
-        name: "Savings",
-        currency: Currency.defaultCurrencyType,
-        accountType: Account.Savings Savings.default
-      }
-    ]
-  },
-  reducer: fun action state =>
-    switch action {
-    | Remove item =>
-      ReasonReact.Update {accounts: state.accounts |> List.filter (fun acc => acc !== item)}
-    | Update item =>
-      ReasonReact.SilentUpdate {
-        accounts:
-          state.accounts |> List.map (fun acc => acc.Account.id == item.Account.id ? item : acc)
-      }
-    | Add =>
-      ReasonReact.Update {
-        accounts:
-          [
-            {
-              Account.id: Uuid.gen (),
-              balance: 0.,
-              name: "Another account",
-              currency: Currency.defaultCurrencyType,
-              accountType: Account.Checking Checking.default
-            }
-          ]
-          |> List.append state.accounts
-      }
+let make nav::(nav: ReactNavigation.Navigation.t {.}) _children => {
+  let saveAccounts accts => {
+    let json =
+      accts
+      |> List.map (fun acct => Account.JSON.marshal acct)
+      |> Array.of_list
+      |> Json.Encode.array
+      |> Js.Json.stringify;
+    AsyncStorage.setItem
+      "accounts"
+      json
+      callback::(
+        fun err =>
+          switch err {
+          | Some _ =>
+            Alert.alert
+              title::"Uh oh" message::"We couldn't save your accounts. Is your phone full?" ()
+          | None => NavigationRe.navigate nav routeName::"OnboardingBudget" ()
+          }
+      )
+      ()
+    |> ignore
+  };
+  {
+    ...comp,
+    initialState: fun () => {
+      accounts: [
+        {
+          id: Uuid.gen (),
+          balance: 100.,
+          name: "My checking account",
+          currency: Currency.defaultCurrencyType,
+          accountType: Account.Checking Checking.default
+        },
+        {
+          id: Uuid.gen (),
+          balance: 100.,
+          name: "Credit Card",
+          currency: Currency.defaultCurrencyType,
+          accountType: Account.CreditCard CreditCard.default
+        },
+        {
+          id: Uuid.gen (),
+          balance: 100.,
+          name: "Savings",
+          currency: Currency.defaultCurrencyType,
+          accountType: Account.Savings Savings.default
+        }
+      ]
     },
-  render: fun self =>
-    <ScrollView style=styles##wrapper contentContainerStyle=styles##wrapperInner>
-      <View style=styles##header />
-      <View>
-        <Text style=styles##title value="Let's get started!" />
-        <Text style=styles##subtitle value="First, let's add some accounts\nto your budget." />
-      </View>
-      <View style=styles##content>
-        <Text
-          style=(StyleSheet.flatten [styles##small, styles##hint])
-          value="Tap to edit or remove"
-        />
-        (
-          self.state.accounts
-          |> List.map (
-               fun acc =>
-                 <OnboardingAccount
-                   key=acc.Account.id
-                   account=acc
-                   onSave=(self.reduce (fun acct => Update acct))
-                   onRemove=(self.reduce (fun acct => Remove acct))
-                 />
-             )
-          |> Array.of_list
-          |> ReasonReact.arrayToElement
-        )
-        <TouchableOpacity onPress=(self.reduce (fun _ev => Add))>
-          <Text style=(StyleSheet.flatten [styles##add, styles##small]) value="Add another" />
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+    didMount: fun self => {
+
+      /** Load accounts from asyncstorage to prepopulate. */
+      AsyncStorage.getItem "accounts" ()
+      |> Js.Promise.then_ (
+           fun a => {
+             switch a {
+             | None => ()
+             | Some json =>
+               self.reduce
+                 (
+                   fun () =>
+                     Load (
+                       Js.Json.parseExn json
+                       |> Json.Decode.array Account.JSON.unmarshal
+                       |> Array.to_list
+                     )
+                 )
+                 ();
+               ()
+             };
+             Js.Promise.resolve ()
+           }
+         )
+      |> ignore;
+      ReasonReact.NoUpdate
+    },
+    reducer: fun action state =>
+      switch action {
+      | Load accts => ReasonReact.Update {accounts: accts}
+      | Remove item =>
+        ReasonReact.Update {accounts: state.accounts |> List.filter (fun acc => acc !== item)}
+      | Update item =>
+        ReasonReact.SilentUpdate {
+          accounts:
+            state.accounts |> List.map (fun acc => acc.Account.id == item.Account.id ? item : acc)
+        }
+      | Add =>
+        ReasonReact.Update {
+          accounts:
+            [
+              {
+                Account.id: Uuid.gen (),
+                balance: 0.,
+                name: "Another account",
+                currency: Currency.defaultCurrencyType,
+                accountType: Account.Checking Checking.default
+              }
+            ]
+            |> List.append state.accounts
+        }
+      },
+    render: fun self =>
+      <ScrollView style=styles##wrapper contentContainerStyle=styles##wrapperInner>
+        <View style=styles##header />
+        <View>
+          <Text style=styles##title value="Let's get started!" />
+          <Text style=styles##subtitle value="First, let's add some accounts\nto your budget." />
+        </View>
+        <View style=styles##content>
+          <Text
+            style=(StyleSheet.flatten [styles##small, styles##hint])
+            value="Tap to edit or remove"
+          />
+          (
+            self.state.accounts
+            |> List.map (
+                 fun acc =>
+                   <OnboardingAccount
+                     key=acc.Account.id
+                     account=acc
+                     onSave=(self.reduce (fun acct => Update acct))
+                     onRemove=(self.reduce (fun acct => Remove acct))
+                   />
+               )
+            |> Array.of_list
+            |> ReasonReact.arrayToElement
+          )
+          <TouchableOpacity onPress=(self.reduce (fun _ev => Add))>
+            <Text style=(StyleSheet.flatten [styles##add, styles##small]) value="Add another" />
+          </TouchableOpacity>
+        </View>
+        <View style=Style.(style [flexDirection `row, justifyContent `center])>
+          <Form.Button
+            style=Style.(style [fontFamily "LFTEtica-Bold", color "#fff"])
+            value="Continue"
+            onPress=(self.handle (fun _a self => saveAccounts self.state.accounts))
+          />
+        </View>
+      </ScrollView>
+  }
 };

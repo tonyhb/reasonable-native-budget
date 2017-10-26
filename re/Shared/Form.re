@@ -10,7 +10,7 @@ module Button = {
               fontFamily "LFTEtica",
               color "#6AA67D",
               textDecorationLine `underline,
-              padding 10.
+              padding 15.
             ]
         }
       );

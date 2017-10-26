@@ -6,7 +6,8 @@ type action =
   | Load Settings.settings;
 
 let updateSettings self settings => {
-  AsyncStorage.setItem "settings" (settings |> Settings.JSON.marshal |> Js.Json.stringify) ();
+  AsyncStorage.setItem "settings" (settings |> Settings.JSON.marshal |> Js.Json.stringify) ()
+  |> ignore;
   self.ReasonReact.reduce (fun _state => Load settings) ()
 };
 
@@ -36,8 +37,7 @@ let make _children => {
     },
   render: fun self =>
     switch self.state.settings {
-    /*| Some _settings => <Navigator />*/
-    | Some _settings => <Welcome onSubmit=(updateSettings self) />
-    | None => <Welcome onSubmit=(updateSettings self) />
+    | Some _settings => <Navigator />
+    | None => <OnboardingNav />
     }
 };
