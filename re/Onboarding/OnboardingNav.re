@@ -1,5 +1,3 @@
-open ReactNative;
-
 type navParams = {.};
 
 let welcome (navigation: ReactNavigation.Navigation.t navParams) =>
@@ -7,6 +5,9 @@ let welcome (navigation: ReactNavigation.Navigation.t navParams) =>
 
 let accounts (navigation: ReactNavigation.Navigation.t navParams) =>
   <OnboardingAccounts nav=navigation />;
+
+let budget (navigation: ReactNavigation.Navigation.t navParams) =>
+  <OnboardingBudget nav=navigation />;
 
 let navOptions = StackNavigatorRe.navigationOptions header::`notVisible ();
 
@@ -24,6 +25,13 @@ let routes: StackNavigatorRe.routes string {.} =
         "NewAccounts",
         route
           screen::(fun {navigation} => accounts navigation)
+          navigationOptions::(`static navOptions)
+          ()
+      ),
+      (
+        "NewBudget",
+        route
+          screen::(fun {navigation} => budget navigation)
           navigationOptions::(`static navOptions)
           ()
       )

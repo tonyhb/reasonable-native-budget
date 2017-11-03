@@ -1,36 +1,23 @@
 type uuid = string;
 
-type category =
-  | Income string
-  /* categories for expenses */
-  | Dining string
-  | Travel string /* should this be broken down into hotels, etc? */
-  | Gas string
-  | Groceries string
-  | House string /* mortgage, rent */
-  | Utilities string
-  | Medical string
-  | Education string
-  | Loans string
-  | Pet string
-  | Household string
-  | Auto string
-  | Clothing string
-  | Charity string
-  | Business string
-  | Disposable string
-  /* categories for transfers */
-  | Saving string
-  | Investment string;
+type category = {
+  name: string,
+  amount: float,
+  hint: option string,
+};
+
+type group = {
+  data: list category,
+  name: string,
+};
 
 type occurence =
-  | Daily
-  | Weekly int
-  | Biweekly int
-  | SemiMonthly int int
-  | Monthly int
-  | Quarterly int
-  | Yearly int;
+ | Yearly
+ | Monthly
+ | Semimonthly
+ | Biweekly
+ | Weekly
+ | Daily;
 
 type subscription = {
   id: uuid,

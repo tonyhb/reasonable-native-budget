@@ -92,13 +92,13 @@ module OnboardingAccount = {
                   selectTextOnFocus=true
                 />
               </Form.Field>
-              <Form.Field style=Style.(style [flex 2.])>
-                <Form.Label value="Starting Balance" />
+              <Form.Field style=Style.(style [flex 3.])>
+                <Form.Label rightAlign=true value="Starting Balance" />
                 <Form.MoneyInput
                   onChangeFloat=(self.reduce (fun value => UpdateBalance value))
                   value=("$" ^ Printf.sprintf "%.2f" self.state.account.balance)
                   selectTextOnFocus=true
-                  style=(Some Style.(style [textAlign `right]))
+                  style=Style.(style [textAlign `right])
                 />
               </Form.Field>
             </View>
@@ -150,25 +150,6 @@ let styles =
   StyleSheet.create
     Style.(
       {
-        "wrapper": style [flex 1., backgroundColor "#79BD8F"],
-        "wrapperInner":
-          style [
-            flexDirection `column,
-            justifyContent `center,
-            padding 15.,
-            backgroundColor "#79BD8F"
-          ],
-        "header": style [height 45., marginBottom 30.],
-        "title":
-          style [
-            fontFamily "LFTEticaDisplayHv",
-            fontSize 30.,
-            textAlign `center,
-            marginBottom 10.,
-            color "#fff"
-          ],
-        "subtitle":
-          style [fontFamily "LFTEtica-Bold", fontSize 16., textAlign `center, color "#fff"],
         "content": style [flex 1., flexDirection `column, marginTop 60., marginBottom 60.],
         "small":
           style [
@@ -210,7 +191,7 @@ let make nav::(nav: ReactNavigation.Navigation.t {.}) _children => {
           | Some _ =>
             Alert.alert
               title::"Uh oh" message::"We couldn't save your accounts. Is your phone full?" ()
-          | None => NavigationRe.navigate nav routeName::"OnboardingBudget" ()
+          | None => NavigationRe.navigate nav routeName::"NewBudget" ()
           }
       )
       ()
@@ -296,12 +277,11 @@ let make nav::(nav: ReactNavigation.Navigation.t {.}) _children => {
         }
       },
     render: fun self =>
-      <ScrollView style=styles##wrapper contentContainerStyle=styles##wrapperInner>
-        <View style=styles##header />
-        <View>
-          <Text style=styles##title value="Let's get started!" />
-          <Text style=styles##subtitle value="First, let's add some accounts\nto your budget." />
-        </View>
+      <OnboardingCommon.Wrapper>
+        <OnboardingCommon.Header
+          title="Let's get started!"
+          subtitle="First, let' add some accounts\nto your budget."
+        />
         <View style=styles##content>
           <Text
             style=(StyleSheet.flatten [styles##small, styles##hint])
@@ -332,6 +312,6 @@ let make nav::(nav: ReactNavigation.Navigation.t {.}) _children => {
             onPress=(self.handle (fun _a self => saveAccounts self.state.accounts))
           />
         </View>
-      </ScrollView>
+      </OnboardingCommon.Wrapper>
   }
 };

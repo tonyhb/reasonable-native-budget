@@ -70,11 +70,20 @@ module Label = {
         {"label": style [fontFamily "LFTEtica", color "#A1A6A6", letterSpacing 1., fontSize 10.]}
       );
   let c = ReasonReact.statelessComponent "Form.Label";
-  let make ::value _children => {
+  let make ::rightAlign=? ::value _children => {
     ...c,
-    render: fun _self => <Text style=styles##label value=(Js.String.toUpperCase value) />
+    render: fun _self => {
+      let style =
+        switch rightAlign {
+        | Some _v => StyleSheet.flatten [styles##label, Style.(style [textAlign `right])]
+        | None => styles##label
+        };
+      <Text style value=(Js.String.toUpperCase value) />
+    }
   };
 };
+
+type textEvt = Js.t {. nativeEvent : {. text : string}};
 
 module TextInput = {
   let styles =
@@ -86,36 +95,60 @@ module TextInput = {
               fontFamily "LFTEtica",
               fontSize 14.0,
               color "#528060",
-              borderBottomWidth 2.,
+              borderBottomWidth 1.,
               borderBottomColor "#EBEBEB",
               padding 0.,
               paddingBottom 6.,
               paddingTop 5.,
-              paddingLeft 10.
+              paddingLeft 0.
             ]
         }
       );
-  let c = ReasonReact.statelessComponent "TextInput";
-  let make
-      style::(style: option StyleRe.t)=None
-      ::value
-      ::onChangeText
-      ::selectTextOnFocus=false
-      _children => {
-    ...c,
-    render: fun _self =>
-      <ReactNative.TextInput
-        underlineColorAndroid="transparent"
-        onChangeText
-        value
-        selectTextOnFocus
-        style=(
-          switch style {
-          | Some s => StyleSheet.flatten [styles##input, s]
-          | None => styles##input
-          }
-        )
-      />
+  type state = {value: string};
+  type actions =
+    | Change string;
+  let c = ReasonReact.reducerComponent "TextInput";
+  let make ::style=? ::value ::onChangeText=? ::onEndEditing=? ::selectTextOnFocus=false _children => {
+    /* onEnd is a function that calls onEndEditing with the current value, if passed from the parent */
+    let onEnd _evt self =>
+      switch onEndEditing {
+      | Some f => f self.ReasonReact.state
+      | None => ()
+      };
+    {
+      ...c,
+      initialState: fun () => value,
+      reducer: fun action _state =>
+        switch action {
+        | Change s => ReasonReact.Update s
+        },
+      render: fun self =>
+        <ReactNative.TextInput
+          underlineColorAndroid="transparent"
+          onChangeText=(
+            self.reduce (
+              fun text => {
+                /* Trigger the onChangeText event from the parent if passed down */
+                switch onChangeText {
+                | Some t => t text
+                | _ => ()
+                };
+                /* Update the component's internal value */
+                Change text
+              }
+            )
+          )
+          onEndEditing=(self.handle onEnd)
+          value=self.state
+          selectTextOnFocus
+          style=(
+            switch style {
+            | Some s => StyleSheet.flatten [styles##input, s]
+            | None => styles##input
+            }
+          )
+        />
+    }
   };
 };
 
@@ -131,12 +164,7 @@ module MoneyInput = {
   /* with retained props as the blur handler calls a prop which passes new props -
      the formatted string */
   let c = ReasonReact.reducerComponent "Form.MoneyInput";
-  let make
-      style::(style: option StyleRe.t)=None
-      ::value
-      ::onChangeFloat
-      ::selectTextOnFocus=false
-      _children => {
+  let make ::style=? ::value ::onChangeFloat ::selectTextOnFocus=true _children => {
     let handleBlur _evt self => {
       let regex = [%bs.re "/[^0-9.]/g"];
       self.ReasonReact.state |> Js.String.replaceByRe regex "" |> float_of_string |> onChangeFloat
