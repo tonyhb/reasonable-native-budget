@@ -38,6 +38,12 @@ let removeCategoryFromGroup group (cat: category) => {
     |> Array.of_list
 };
 
+let groupTotal (group: group) =>
+  group.data |> Array.fold_left (fun total cat => total +. cat.amount) 0.;
+
+let total (groups: array group) =>
+  groups |> Array.fold_left (fun total group => total +. groupTotal group) 0.;
+
 let basic: array group = [|
   group
     name::"Expenses"
@@ -85,3 +91,35 @@ let standard: array group = [|
       category name::"Retirement" ()
     |]
 |];
+
+module JSON = {
+  let marshalCategory (cat: category) => Json.Encode.(
+    object_ [
+      ("id", string cat.id),
+      ("name", string cat.name),
+      ("amount", Json.Encode.float cat.amount),
+      ("hint", nullable string cat.hint),
+    ]
+  );
+
+  let marshalGroup g => Json.Encode.(
+    object_ [
+      ("id", string g.id),
+      ("name", string g.name),
+      ("data", arrayOf marshalCategory g.data),
+    ]
+  );
+
+  let unmarshalCategory json => Json.Decode.{
+    id: json |> field "id" string,
+    name: json |> field "name" string,
+    amount: json |> field "amount" Json.Decode.float,
+    hint: json |> field "hint" (optional string),
+  };
+
+  let unmarshalGroup json => Json.Decode.{
+    id: json |> field "id" string,
+    name: json |> field "name" string,
+    data: json |> field "data" (array unmarshalCategory),
+  };
+};

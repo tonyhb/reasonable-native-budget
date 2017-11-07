@@ -180,7 +180,7 @@ let make nav::(nav: ReactNavigation.Navigation.t {.}) _children => {
       accts
       |> List.map (fun acct => Account.JSON.marshal acct)
       |> Array.of_list
-      |> Json.Encode.array
+      |> Json.Encode.jsonArray
       |> Js.Json.stringify;
     AsyncStorage.setItem
       "accounts"

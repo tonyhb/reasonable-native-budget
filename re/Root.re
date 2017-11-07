@@ -1,29 +1,28 @@
 open ReactNative;
 
-type state = {settings: option Settings.settings};
+type state = {budget: array Budget.group};
 
 type action =
-  | Load Settings.settings;
-
-let updateSettings self settings => {
-  AsyncStorage.setItem "settings" (settings |> Settings.JSON.marshal |> Js.Json.stringify) ()
-  |> ignore;
-  self.ReasonReact.reduce (fun _state => Load settings) ()
-};
+  | Load (array Budget.group);
 
 let component = ReasonReact.reducerComponent "Root";
 
 let make _children => {
   ...component,
-  initialState: fun () => ({settings: None}: state),
+  initialState: fun () => {budget: [||]},
   didMount: fun self => {
-    AsyncStorage.getItem "settings" ()
+    AsyncStorage.getItem "budget" ()
     |> Js.Promise.then_ (
          fun optStore => {
            switch optStore {
            | None => ()
-           | Some string =>
-             Js.Json.parseExn string |> Settings.JSON.unmarshal |> updateSettings self
+           | Some json =>
+             self.reduce
+               (
+                 fun () =>
+                   Load (json |> Js.Json.parseExn |> Json.Decode.array Budget.JSON.unmarshalGroup)
+               )
+               ()
            };
            Js.Promise.resolve ()
          }
@@ -33,11 +32,11 @@ let make _children => {
   },
   reducer: fun action _state =>
     switch action {
-    | Load settings => ReasonReact.Update {settings: Some settings}
+    | Load budget => ReasonReact.Update {budget: budget}
     },
   render: fun self =>
-    switch self.state.settings {
-    | Some _settings => <Navigator />
-    | None => <OnboardingNav />
+    switch (Array.length self.state.budget) {
+    | 0 => <OnboardingNav />
+    | _ => <Navigator />
     }
 };

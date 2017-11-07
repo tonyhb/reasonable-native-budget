@@ -24,8 +24,8 @@
 		"preset": "jest-expo"
 	},
 	"dependencies": {
-		"bs-json": "^0.2.3",
-		"bs-platform": "https://github.com/BuckleScript/bucklescript#04e6fb7da78aee0292aba3fd5f87b31c200d5033",
+		"bs-json": "^0.2.4",
+		"bs-platform": "2.0.0",
 		"bs-react-native": "^0.2.1",
 		"bs-react-navigation": "https://github.com/saschatimme/bs-react-navigation.git#658773e8997be7a8ec329a18a5a24057307b21eb",
 		"react": "16.0.0",

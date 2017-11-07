@@ -1,16 +1,5 @@
 type uuid = string;
 
-type category = {
-  name: string,
-  amount: float,
-  hint: option string,
-};
-
-type group = {
-  data: list category,
-  name: string,
-};
-
 type occurence =
  | Yearly
  | Monthly
@@ -27,7 +16,7 @@ type subscription = {
   account: Account.t, /* The account that this will be debited from */
   currency: Currency.currencyType, /* The currency that the subscription is in */
   occurence, /* How often this subscription occurs */
-  category /* A category for the subscription expense */
+  category: Budget.category /* A category for the subscription expense */
 };
 
 type latlng = (float, float);
@@ -48,7 +37,7 @@ type income = {
   payee: recipient,
   amountIn: float,
   description: string,
-  category,
+  category: Budget.category,
   createdAt: int,
   updatedAt: int
 };
@@ -57,7 +46,7 @@ type subscriptionExpense = {
   id: uuid,
   subscription,
   account: Account.t,
-  category,
+  category: Budget.category,
   recipient,
   currency: Currency.currencyType,
   amountOut: float,
@@ -70,7 +59,7 @@ type subscriptionExpense = {
 type expense = {
   id: uuid,
   account: Account.t,
-  category,
+  category: Budget.category,
   recipient,
   currency: Currency.currencyType,
   amountOut: float,
@@ -91,14 +80,25 @@ type transfer = {
   toCurrency: Currency.currencyType,
   amount: float,
   description: string,
-  category,
+  category: Budget.category,
   createdAt: int,
   updatedAt: int
 };
 
 /* an entry in a budget is either an income, expense or transfer */
-type entry =
+type entryType =
   | Income income
   | Expense expense
   | SubscriptionExpense subscriptionExpense
   | Transfer transfer;
+
+type entry = {
+  id: string,
+  date: int,
+  source: Account.t,
+  description: string,
+  amount: float,
+  createdAt: int,
+  updatedAt: int,
+  entryType,
+}
