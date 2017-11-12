@@ -2,28 +2,32 @@ open ReactNative;
 
 module OnboadringAccountPreview = {
   let styles =
-    StyleSheet.create
+    StyleSheet.create(
       Style.(
         {
-          "info": style [fontFamily "LFTEtica", fontSize 20., color "#528060", marginBottom 2.],
-          "_type": style [fontFamily "LFTEtica", fontSize 12., color "#85A58F"],
-          "row": style [flexDirection `row, justifyContent `spaceBetween]
+          "info": style([fontFamily("LFTEtica"), fontSize(20.), color("#528060"), marginBottom(2.)]),
+          "_type": style([fontFamily("LFTEtica"), fontSize(12.), color("#85A58F")]),
+          "row": style([flexDirection(`row), justifyContent(`spaceBetween)])
         }
-      );
-  let c = ReasonReact.statelessComponent "OnboardingAccountPreview";
-  let make ::account _children => {
+      )
+    );
+  let c = ReasonReact.statelessComponent("OnboardingAccountPreview");
+  let make = (~account, _children) => {
     ...c,
-    render: fun _self =>
+    render: (_self) =>
       <Card>
         <Card.Content>
           <View style=styles##row>
             <Text style=styles##info value=account.Account.name />
-            <Text style=styles##info value=("$" ^ Printf.sprintf "%.2f" account.Account.balance) />
+            <Text
+              style=styles##info
+              value=("$" ++ Printf.sprintf("%.2f", account.Account.balance))
+            />
           </View>
           <View style=styles##row>
             <Text
               style=styles##_type
-              value=(Account.string_of_accountType account.Account.accountType)
+              value=(Account.string_of_accountType(account.Account.accountType))
             />
           </View>
         </Card.Content>
@@ -34,71 +38,72 @@ module OnboadringAccountPreview = {
 /* OnboardingAccount is used to create accounts during onboarding */
 module OnboardingAccount = {
   let styles =
-    StyleSheet.create
+    StyleSheet.create(
       Style.(
         {
-          "info": style [fontFamily "LFTEtica", fontSize 20., color "#528060", marginBottom 2.],
-          "_type": style [fontFamily "LFTEtica", fontSize 12., color "#85A58F"],
-          "row": style [flexDirection `row, justifyContent `spaceBetween],
+          "info": style([fontFamily("LFTEtica"), fontSize(20.), color("#528060"), marginBottom(2.)]),
+          "_type": style([fontFamily("LFTEtica"), fontSize(12.), color("#85A58F")]),
+          "row": style([flexDirection(`row), justifyContent(`spaceBetween)]),
           "buttonWrapper":
-            style [
-              flexDirection `row,
-              justifyContent `spaceBetween,
-              paddingLeft 15.,
-              paddingRight 15.,
-              marginTop (-15.),
-              marginBottom (-5.)
-            ]
+            style([
+              flexDirection(`row),
+              justifyContent(`spaceBetween),
+              paddingLeft(15.),
+              paddingRight(15.),
+              marginTop((-15.)),
+              marginBottom((-5.))
+            ])
         }
-      );
+      )
+    );
   type state = {
     editing: bool,
     account: Account.t
   };
   type action =
-    | ToggleEdit bool
-    | UpdateName string
-    | UpdateType Account.accountType
-    | UpdateBalance float;
-  let c = ReasonReact.reducerComponent "OnboardingAccount";
-  let make ::onSave ::onRemove ::account _children => {
+    | ToggleEdit(bool)
+    | UpdateName(string)
+    | UpdateType(Account.accountType)
+    | UpdateBalance(float);
+  let c = ReasonReact.reducerComponent("OnboardingAccount");
+  let make = (~onSave, ~onRemove, ~account, _children) => {
     ...c,
-    initialState: fun () => {account, editing: false},
-    reducer: fun action state =>
+    initialState: () => {account, editing: false},
+    reducer: (action, state) =>
       switch action {
-      | ToggleEdit editing => ReasonReact.Update {...state, editing}
-      | UpdateName name => ReasonReact.Update {...state, account: {...state.account, name}}
-      | UpdateType accountType =>
-        ReasonReact.Update {...state, account: {...state.account, accountType}}
-      | UpdateBalance balance =>
-        ReasonReact.Update {...state, account: {...state.account, balance}}
+      | ToggleEdit(editing) => ReasonReact.Update({...state, editing})
+      | UpdateName(name) => ReasonReact.Update({...state, account: {...state.account, name}})
+      | UpdateType(accountType) =>
+        ReasonReact.Update({...state, account: {...state.account, accountType}})
+      | UpdateBalance(balance) =>
+        ReasonReact.Update({...state, account: {...state.account, balance}})
       },
-    render: fun self => {
+    render: (self) => {
       let {account} = self.state;
       switch self.state.editing {
       | false =>
-        <TouchableOpacity onPress=(self.reduce (fun _evt => ToggleEdit true))>
+        <TouchableOpacity onPress=(self.reduce((_evt) => ToggleEdit(true)))>
           <OnboadringAccountPreview account />
         </TouchableOpacity>
       | true =>
         <Card>
           <Card.Content>
-            <View style=Style.(style [flexDirection `row])>
-              <Form.Field style=Style.(style [flex 5., marginRight 15.])>
+            <View style=Style.(style([flexDirection(`row)]))>
+              <Form.Field style=Style.(style([flex(5.), marginRight(15.)]))>
                 <Form.Label value="Account name" />
                 <Form.TextInput
-                  onChangeText=(self.reduce (fun text => UpdateName text))
+                  onChangeText=(self.reduce((text) => UpdateName(text)))
                   value=self.state.account.name
                   selectTextOnFocus=true
                 />
               </Form.Field>
-              <Form.Field style=Style.(style [flex 3.])>
+              <Form.Field style=Style.(style([flex(3.)]))>
                 <Form.Label rightAlign=true value="Starting Balance" />
                 <Form.MoneyInput
-                  onChangeFloat=(self.reduce (fun value => UpdateBalance value))
-                  value=("$" ^ Printf.sprintf "%.2f" self.state.account.balance)
+                  onChangeFloat=(self.reduce((value) => UpdateBalance(value)))
+                  value=("$" ++ Printf.sprintf("%.2f", self.state.account.balance))
                   selectTextOnFocus=true
-                  style=Style.(style [textAlign `right])
+                  style=Style.(style([textAlign(`right)]))
                 />
               </Form.Field>
             </View>
@@ -106,13 +111,13 @@ module OnboardingAccount = {
               <Form.Label value="Account type" />
               <Form.Picker
                 onValueChange=(
-                  self.reduce (fun type_ => UpdateType (Account.accountType_of_string type_))
+                  self.reduce((type_) => UpdateType(Account.accountType_of_string(type_)))
                 )
-                selectedValue=(Account.string_of_accountType self.state.account.accountType)>
+                selectedValue=(Account.string_of_accountType(self.state.account.accountType))>
                 (
                   Account.accountDefaults
-                  |> Js.Array.map (
-                       fun pa =>
+                  |> Js.Array.map(
+                       (pa) =>
                          <Picker.Item
                            key=pa.Account.text
                            value=pa.Account.text
@@ -125,14 +130,14 @@ module OnboardingAccount = {
               </Form.Picker>
             </Form.Field>
             <View style=styles##buttonWrapper>
-              <Form.DestructiveButton value="Remove" onPress=(fun _e => onRemove account) />
+              <Form.DestructiveButton value="Remove" onPress=((_e) => onRemove(account)) />
               <Form.PrimaryButton
                 value="OK"
                 onPress=(
-                  self.reduce (
-                    fun _e => {
-                      onSave self.state.account;
-                      ToggleEdit false
+                  self.reduce(
+                    (_e) => {
+                      onSave(self.state.account);
+                      ToggleEdit(false)
                     }
                   )
                 )
@@ -147,136 +152,139 @@ module OnboardingAccount = {
 };
 
 let styles =
-  StyleSheet.create
+  StyleSheet.create(
     Style.(
       {
-        "content": style [flex 1., flexDirection `column, marginTop 60., marginBottom 60.],
+        "content": style([flex(1.), flexDirection(`column), marginTop(60.), marginBottom(60.)]),
         "small":
-          style [
-            fontFamily "LFTEtica",
-            fontSize 12.,
-            textAlign `center,
-            color "#fff",
-            marginBottom 10.
-          ],
-        "hint": style [opacity 0.75],
-        "add": style [marginTop 10., textDecorationLine `underline]
+          style([
+            fontFamily("LFTEtica"),
+            fontSize(12.),
+            textAlign(`center),
+            color("#fff"),
+            marginBottom(10.)
+          ]),
+        "hint": style([opacity(0.75)]),
+        "add": style([marginTop(10.), textDecorationLine(`underline)])
       }
-    );
+    )
+  );
 
-type state = {accounts: list Account.t};
+type state = {accounts: list(Account.t)};
 
 type actions =
-  | Load (list Account.t)
-  | Remove Account.t
-  | Update Account.t
+  | Load(list(Account.t))
+  | Remove(Account.t)
+  | Update(Account.t)
   | Add;
 
-let comp = ReasonReact.reducerComponent "OnboardingAccounts";
+let comp = ReasonReact.reducerComponent("OnboardingAccounts");
 
-let make nav::(nav: ReactNavigation.Navigation.t {.}) _children => {
-  let saveAccounts accts => {
+let make = (~nav: ReactNavigation.Navigation.t({.}), _children) => {
+  let saveAccounts = (accts) => {
     let json =
       accts
-      |> List.map (fun acct => Account.JSON.marshal acct)
+      |> List.map((acct) => Account.JSON.marshal(acct))
       |> Array.of_list
       |> Json.Encode.jsonArray
       |> Js.Json.stringify;
-    AsyncStorage.setItem
-      "accounts"
-      json
-      callback::(
-        fun err =>
+    AsyncStorage.setItem(
+      "accounts",
+      json,
+      ~callback=
+        (err) =>
           switch err {
-          | Some _ =>
-            Alert.alert
-              title::"Uh oh" message::"We couldn't save your accounts. Is your phone full?" ()
-          | None => NavigationRe.navigate nav routeName::"NewBudget" ()
-          }
-      )
+          | Some(_) =>
+            Alert.alert(
+              ~title="Uh oh",
+              ~message="We couldn't save your accounts. Is your phone full?",
+              ()
+            )
+          | None => NavigationRe.navigate(nav, ~routeName="NewBudget", ())
+          },
       ()
+    )
     |> ignore
   };
   {
     ...comp,
-    initialState: fun () => {
+    initialState: () => {
       accounts: [
         {
-          id: Uuid.gen (),
+          id: Uuid.gen(),
           balance: 100.,
           name: "My checking account",
           currency: Currency.defaultCurrencyType,
-          accountType: Account.Checking Checking.default
+          accountType: Account.Checking(Checking.default)
         },
         {
-          id: Uuid.gen (),
+          id: Uuid.gen(),
           balance: 100.,
           name: "Credit Card",
           currency: Currency.defaultCurrencyType,
-          accountType: Account.CreditCard CreditCard.default
+          accountType: Account.CreditCard(CreditCard.default)
         },
         {
-          id: Uuid.gen (),
+          id: Uuid.gen(),
           balance: 100.,
           name: "Savings",
           currency: Currency.defaultCurrencyType,
-          accountType: Account.Savings Savings.default
+          accountType: Account.Savings(Savings.default)
         }
       ]
     },
-    didMount: fun self => {
+    didMount: (self) => {
 
-      /** Load accounts from asyncstorage to prepopulate. */
-      AsyncStorage.getItem "accounts" ()
-      |> Js.Promise.then_ (
-           fun a => {
+      /*** Load accounts from asyncstorage to prepopulate. */
+      AsyncStorage.getItem("accounts", ())
+      |> Js.Promise.then_(
+           (a) => {
              switch a {
              | None => ()
-             | Some json =>
-               self.reduce
-                 (
-                   fun () =>
-                     Load (
-                       Js.Json.parseExn json
-                       |> Json.Decode.array Account.JSON.unmarshal
-                       |> Array.to_list
-                     )
-                 )
-                 ();
+             | Some(json) =>
+               self.reduce(
+                 () =>
+                   Load(
+                     Js.Json.parseExn(json)
+                     |> Json.Decode.array(Account.JSON.unmarshal)
+                     |> Array.to_list
+                   ),
+                 ()
+               );
                ()
              };
-             Js.Promise.resolve ()
+             Js.Promise.resolve()
            }
          )
       |> ignore;
       ReasonReact.NoUpdate
     },
-    reducer: fun action state =>
+    reducer: (action, state) =>
       switch action {
-      | Load accts => ReasonReact.Update {accounts: accts}
-      | Remove item =>
-        ReasonReact.Update {accounts: state.accounts |> List.filter (fun acc => acc !== item)}
-      | Update item =>
-        ReasonReact.SilentUpdate {
+      | Load(accts) => ReasonReact.Update({accounts: accts})
+      | Remove(item) =>
+        ReasonReact.Update({accounts: state.accounts |> List.filter((acc) => acc !== item)})
+      | Update(item) =>
+        ReasonReact.SilentUpdate({
           accounts:
-            state.accounts |> List.map (fun acc => acc.Account.id == item.Account.id ? item : acc)
-        }
+            state.accounts |> List.map((acc) => acc.Account.id == item.Account.id ? item : acc)
+        })
       | Add =>
-        ReasonReact.Update {
+        ReasonReact.Update({
           accounts:
             [
               {
-                Account.id: Uuid.gen (),
+                Account.id: Uuid.gen(),
                 balance: 0.,
                 name: "Another account",
                 currency: Currency.defaultCurrencyType,
-                accountType: Account.Checking Checking.default
+                accountType: Account.Checking(Checking.default)
               }
             ]
-            |> List.append state.accounts
-        }
+            |> List.append(state.accounts)
+        })
       },
-    render: fun self =>
+    render: (self) =>
       <OnboardingCommon.Wrapper>
         <OnboardingCommon.Header
           title="Let's get started!"
@@ -284,32 +292,32 @@ let make nav::(nav: ReactNavigation.Navigation.t {.}) _children => {
         />
         <View style=styles##content>
           <Text
-            style=(StyleSheet.flatten [styles##small, styles##hint])
+            style=(StyleSheet.flatten([styles##small, styles##hint]))
             value="Tap to edit or remove"
           />
           (
             self.state.accounts
-            |> List.map (
-                 fun acc =>
+            |> List.map(
+                 (acc) =>
                    <OnboardingAccount
                      key=acc.Account.id
                      account=acc
-                     onSave=(self.reduce (fun acct => Update acct))
-                     onRemove=(self.reduce (fun acct => Remove acct))
+                     onSave=(self.reduce((acct) => Update(acct)))
+                     onRemove=(self.reduce((acct) => Remove(acct)))
                    />
                )
             |> Array.of_list
             |> ReasonReact.arrayToElement
           )
-          <TouchableOpacity onPress=(self.reduce (fun _ev => Add))>
-            <Text style=(StyleSheet.flatten [styles##add, styles##small]) value="Add another" />
+          <TouchableOpacity onPress=(self.reduce((_ev) => Add))>
+            <Text style=(StyleSheet.flatten([styles##add, styles##small])) value="Add another" />
           </TouchableOpacity>
         </View>
-        <View style=Style.(style [flexDirection `row, justifyContent `center])>
+        <View style=Style.(style([flexDirection(`row), justifyContent(`center)]))>
           <Form.Button
-            style=Style.(style [fontFamily "LFTEtica-Bold", color "#fff"])
+            style=Style.(style([fontFamily("LFTEtica-Bold"), color("#fff")]))
             value="Continue"
-            onPress=(self.handle (fun _a self => saveAccounts self.state.accounts))
+            onPress=(self.handle((_a, self) => saveAccounts(self.state.accounts)))
           />
         </View>
       </OnboardingCommon.Wrapper>

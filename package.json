@@ -30,6 +30,9 @@
 		"bs-react-navigation": "https://github.com/saschatimme/bs-react-navigation.git#658773e8997be7a8ec329a18a5a24057307b21eb",
 		"react": "16.0.0",
 		"react-native": "0.50.0-rc.1",
+		"react-router": "^4.2.0",
+		"react-router-native": "^4.2.0",
+		"react-router-navigation": "^1.0.0-rc.3",
 		"reason-react": "^0.2.4"
 	}
 }

@@ -9,5 +9,6 @@
   "sources": [{
     "dir": "re",
     "subdirs": true
-  }]
+  }],
+  "refmt": 3
 }

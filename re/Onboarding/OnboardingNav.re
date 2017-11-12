@@ -1,43 +1,46 @@
 type navParams = {.};
 
-let welcome (navigation: ReactNavigation.Navigation.t navParams) =>
+let welcome = (navigation: ReactNavigation.Navigation.t(navParams)) =>
   <OnboardingIntro nav=navigation />;
 
-let accounts (navigation: ReactNavigation.Navigation.t navParams) =>
+let accounts = (navigation: ReactNavigation.Navigation.t(navParams)) =>
   <OnboardingAccounts nav=navigation />;
 
-let budget (navigation: ReactNavigation.Navigation.t navParams) =>
+let budget = (navigation: ReactNavigation.Navigation.t(navParams)) =>
   <OnboardingBudget nav=navigation />;
 
-let navOptions = StackNavigatorRe.navigationOptions header::`notVisible ();
+let navOptions = StackNavigatorRe.navigationOptions(~header=`notVisible, ());
 
-let routes: StackNavigatorRe.routes string {.} =
+let routes: StackNavigatorRe.routes(string, {.}) =
   StackNavigatorRe.(
-    routes [
+    routes([
       (
         "Welcome",
-        route
-          screen::(fun {navigation} => welcome navigation)
-          navigationOptions::(`static navOptions)
+        route(
+          ~screen=({navigation}) => welcome(navigation),
+          ~navigationOptions=`static(navOptions),
           ()
+        )
       ),
       (
         "NewAccounts",
-        route
-          screen::(fun {navigation} => accounts navigation)
-          navigationOptions::(`static navOptions)
+        route(
+          ~screen=({navigation}) => accounts(navigation),
+          ~navigationOptions=`static(navOptions),
           ()
+        )
       ),
       (
         "NewBudget",
-        route
-          screen::(fun {navigation} => budget navigation)
-          navigationOptions::(`static navOptions)
+        route(
+          ~screen=({navigation}) => budget(navigation),
+          ~navigationOptions=`static(navOptions),
           ()
+        )
       )
-    ]
+    ])
   );
 
-let stackRouter = StackNavigatorRe.create routes None;
+let stackRouter = StackNavigatorRe.create(routes, None);
 
-let make children => stackRouter screenProps::() children;
+let make = (children) => stackRouter(~screenProps=(), children);

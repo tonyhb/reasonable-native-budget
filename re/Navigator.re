@@ -1,22 +1,24 @@
-open ReactNative;
 
-type navParams = {.};
+type globalArgs = {
+	budget: array(Budget.group),
+};
 
-let home (navigation: ReactNavigation.Navigation.t navParams) => <Home nav=navigation />;
+let initialArgs = {
+	budget: [||]
+};
 
-let navOptions = StackNavigatorRe.navigationOptions header::`notVisible ();
+let c = ReasonReact.statelessComponent("Navigator");
 
-let routes: StackNavigatorRe.routes string {.} =
-  StackNavigatorRe.(
-    routes [
-      (
-        "Home",
-        route
-          screen::(fun {navigation} => home navigation) navigationOptions::(`static navOptions) ()
-      )
-    ]
-  );
-
-let stackRouter = StackNavigatorRe.create routes None;
-
-let make children => stackRouter screenProps::() children;
+let make = (~budget, _children) => {
+	...c,
+	render: _self => 
+		<RRNavigation.NativeRouter>
+			<RRNavigation.Navigation hideNavBar=true>
+				<RRNavigation.Card
+					exact=true
+					path="/"
+					render=(({ push }) => <Home push budget={budget} />)
+				/>
+			</RRNavigation.Navigation>
+		</RRNavigation.NativeRouter>
+};

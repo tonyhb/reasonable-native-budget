@@ -1,5 +1,5 @@
 /* TODO: Proper UUID */
-let gen () :string => [%bs.raw
+let gen = () : string => [%bs.raw
   {|
     (function() {
       var d = new Date().getTime();

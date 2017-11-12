@@ -5,27 +5,27 @@ type t = {taxType: [ | `Traditional | `Roth]};
 let default = {taxType: `Traditional};
 
 module JSON = {
-  let marshal item =>
+  let marshal = (item) =>
     Json.Encode.(
-      object_ [
+      object_([
         (
           "taxType",
-          string (
+          string(
             switch item.taxType {
             | `Traditional => "Traditional"
             | `Roth => "Roth"
             }
           )
         )
-      ]
+      ])
     );
-  let unmarshal json =>
+  let unmarshal = (json) =>
     Json.Decode.{
       taxType:
-        switch (json |> field "taxType" string) {
+        switch (json |> field("taxType", string)) {
         | "Traditional" => `Traditional
         | "Roth" => `Roth
-        | _ => failwith "Expected Roth or Traditional taxType"
+        | _ => failwith("Expected Roth or Traditional taxType")
         }
     };
 };

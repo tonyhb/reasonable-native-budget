@@ -1,12 +1,12 @@
 type uuid = string;
 
 type occurence =
- | Yearly
- | Monthly
- | Semimonthly
- | Biweekly
- | Weekly
- | Daily;
+  | Yearly
+  | Monthly
+  | Semimonthly
+  | Biweekly
+  | Weekly
+  | Daily;
 
 type subscription = {
   id: uuid,
@@ -31,7 +31,7 @@ type recipient = {
 type tag = string;
 
 
-/** Entry types **/
+/*** Entry types **/
 type income = {
   id: uuid,
   payee: recipient,
@@ -68,8 +68,8 @@ type expense = {
   date: int,
   createdAt: int,
   updatedAt: int,
-  /** TODO: Based on category and createdAt, is this worth double/triple points? */
-  tags: array tag
+  /*** TODO: Based on category and createdAt, is this worth double/triple points? */
+  tags: array(tag)
 };
 
 type transfer = {
@@ -87,10 +87,10 @@ type transfer = {
 
 /* an entry in a budget is either an income, expense or transfer */
 type entryType =
-  | Income income
-  | Expense expense
-  | SubscriptionExpense subscriptionExpense
-  | Transfer transfer;
+  | Income(income)
+  | Expense(expense)
+  | SubscriptionExpense(subscriptionExpense)
+  | Transfer(transfer);
 
 type entry = {
   id: string,
@@ -100,5 +100,5 @@ type entry = {
   amount: float,
   createdAt: int,
   updatedAt: int,
-  entryType,
-}
+  entryType
+};

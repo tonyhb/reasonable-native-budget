@@ -1,42 +1,41 @@
 open ReactNative;
 
-type state = {budget: array Budget.group};
+type state = {budget: array(Budget.group)};
 
 type action =
-  | Load (array Budget.group);
+  | Load(array(Budget.group));
 
-let component = ReasonReact.reducerComponent "Root";
+let component = ReasonReact.reducerComponent("Root");
 
-let make _children => {
+let make = (_children) => {
   ...component,
-  initialState: fun () => {budget: [||]},
-  didMount: fun self => {
-    AsyncStorage.getItem "budget" ()
-    |> Js.Promise.then_ (
-         fun optStore => {
+  initialState: () => {budget: [||]},
+  didMount: (self) => {
+    AsyncStorage.getItem("budget", ())
+    |> Js.Promise.then_(
+         (optStore) => {
            switch optStore {
            | None => ()
-           | Some json =>
-             self.reduce
-               (
-                 fun () =>
-                   Load (json |> Js.Json.parseExn |> Json.Decode.array Budget.JSON.unmarshalGroup)
-               )
+           | Some(json) =>
+             self.reduce(
+               () =>
+                 Load(json |> Js.Json.parseExn |> Json.Decode.array(Budget.JSON.unmarshalGroup)),
                ()
+             )
            };
-           Js.Promise.resolve ()
+           Js.Promise.resolve()
          }
        )
     |> ignore;
     ReasonReact.NoUpdate
   },
-  reducer: fun action _state =>
+  reducer: (action, _state) =>
     switch action {
-    | Load budget => ReasonReact.Update {budget: budget}
+    | Load(budget) => ReasonReact.Update({budget: budget})
     },
-  render: fun self =>
-    switch (Array.length self.state.budget) {
+  render: (self) =>
+    switch (Array.length(self.state.budget)) {
     | 0 => <OnboardingNav />
-    | _ => <Navigator />
+    | _ => <Navigator budget=self.state.budget />
     }
 };

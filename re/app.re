@@ -1,1 +1,1 @@
-let app () => <Root />;
+let app = () => <Root />;
