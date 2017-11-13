@@ -1,6 +1,6 @@
 let c = ReasonReact.statelessComponent("Navigator");
 
-let make = (~budget, ~updateBudget, _children) => {
+let make = (~budget: Budget.t, ~updateBudget: (Budget.t => unit), _children) => {
 	...c,
 	render: _self => 
 		<RRNavigation.NativeRouter>

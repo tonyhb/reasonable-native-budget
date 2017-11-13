@@ -88,6 +88,12 @@ type t = {
 		accounts: array(Account.t)
 };
 
+let blankBudget = () => {
+  settings: {defaultCurrency: Currency.defaultCurrencyType},
+  budget: [||],
+  accounts: [||],
+};
+
 module JSON = {
 		let marshal = (data) => {
 				Json.Encode.(

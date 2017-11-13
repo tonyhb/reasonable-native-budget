@@ -5,7 +5,7 @@ open SectionList;
 let defaultStandardBudget =
   Budget.basic
   |> Array.map(
-       (group) => SectionList.section(~data=group.Budget.data, ~key=group.Budget.name, ())
+       (group) => SectionList.section(~data=group.Budget.Group.data, ~key=group.Budget.Group.name, ())
      )
   |> SectionList.sections;
 
@@ -50,7 +50,7 @@ module BudgetCategory = {
       )
     );
   let c = ReasonReact.statelessComponent("Onboarding.BudgetParent");
-  let make = (~category: Budget.category, ~onChange, ~onRemove, _children) => {
+  let make = (~category: Budget.Category.t, ~onChange, ~onRemove, _children) => {
     let updateName = (name) => onChange({...category, name}, ());
     let updateAmount = (amount) => onChange({...category, amount}, ());
     {
@@ -75,13 +75,13 @@ module BudgetCategory = {
   };
 };
 
-type state = {budget: array(Budget.group)};
+type state = {budget: array(Budget.Group.t)};
 
 type actions =
-  | ResetBudget(array(Budget.group))
-  | UpdateGroup(Budget.group)
-  | UpdateCategory(Budget.category)
-  | RemoveCategory(Budget.category);
+  | ResetBudget(array(Budget.Group.t))
+  | UpdateGroup(Budget.Group.t)
+  | UpdateCategory(Budget.Category.t)
+  | RemoveCategory(Budget.Category.t);
 
 let styles =
   StyleSheet.create(
@@ -108,12 +108,12 @@ let make = (~nav as _nav: ReactNavigation.Navigation.t({.}), _children) => {
   let sectionsOfBudget = (budget) =>
     budget
     |> Array.map(
-         (group) => SectionList.section(~data=group.Budget.data, ~key=group.Budget.name, ())
+         (group) => SectionList.section(~data=group.Budget.Group.data, ~key=group.Budget.Group.name, ())
        )
     |> SectionList.sections;
   let saveBudget = (groups) => {
     let json =
-      groups |> Array.map(Budget.JSON.marshalGroup) |> Json.Encode.jsonArray |> Js.Json.stringify;
+      groups |> Array.map(Budget.Group.JSON.marshal) |> Json.Encode.jsonArray |> Js.Json.stringify;
     AsyncStorage.setItem(
       "budget",
       json,
@@ -139,15 +139,15 @@ let make = (~nav as _nav: ReactNavigation.Navigation.t({.}), _children) => {
       switch action {
       | UpdateGroup(group) =>
         ReasonReact.Update({
-          budget: state.budget |> Array.map((item) => item.Budget.id == group.id ? group : item)
+          budget: state.budget |> Array.map((item) => item.Budget.Group.id == group.id ? group : item)
         })
       | UpdateCategory(cat) =>
         ReasonReact.Update({
-          budget: state.budget |> Array.map((group) => Budget.updateCategoryInGroup(group, cat))
+          budget: state.budget |> Array.map((group) => Budget.Group.updateCategoryInGroup(group, cat))
         })
       | RemoveCategory(cat) =>
         ReasonReact.Update({
-          budget: state.budget |> Array.map((group) => Budget.removeCategoryFromGroup(group, cat))
+          budget: state.budget |> Array.map((group) => Budget.Group.removeCategoryFromGroup(group, cat))
         })
       | ResetBudget(budget) => ReasonReact.Update({budget: budget})
       },
@@ -161,7 +161,7 @@ let make = (~nav as _nav: ReactNavigation.Navigation.t({.}), _children) => {
                self.reduce(
                  () =>
                    ResetBudget(
-                     json |> Js.Json.parseExn |> Json.Decode.array(Budget.JSON.unmarshalGroup)
+                     json |> Js.Json.parseExn |> Json.Decode.array(Budget.Group.JSON.unmarshal)
                    ),
                  ()
                )
@@ -204,7 +204,7 @@ let make = (~nav as _nav: ReactNavigation.Navigation.t({.}), _children) => {
             style=styles##total
             value=(
               "BUDGETED  TOTAL, MONTHLY: $"
-              ++ Printf.sprintf("%.2f", Budget.total(self.state.budget))
+              ++ Printf.sprintf("%.2f", Budget.Group.total(self.state.budget))
             )
           />
           <View style=Style.(style([flexDirection(`row), justifyContent(`center)]))>

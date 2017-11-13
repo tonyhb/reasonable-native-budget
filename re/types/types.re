@@ -16,7 +16,7 @@ type subscription = {
   account: Account.t, /* The account that this will be debited from */
   currency: Currency.currencyType, /* The currency that the subscription is in */
   occurence, /* How often this subscription occurs */
-  category: Budget.category /* A category for the subscription expense */
+  category: Budget.Category.t /* A category for the subscription expense */
 };
 
 type latlng = (float, float);
@@ -37,7 +37,7 @@ type income = {
   payee: recipient,
   amountIn: float,
   description: string,
-  category: Budget.category,
+  category: Budget.Category.t,
   createdAt: int,
   updatedAt: int
 };
@@ -46,7 +46,7 @@ type subscriptionExpense = {
   id: uuid,
   subscription,
   account: Account.t,
-  category: Budget.category,
+  category: Budget.Category.t,
   recipient,
   currency: Currency.currencyType,
   amountOut: float,
@@ -59,7 +59,7 @@ type subscriptionExpense = {
 type expense = {
   id: uuid,
   account: Account.t,
-  category: Budget.category,
+  category: Budget.Category.t,
   recipient,
   currency: Currency.currencyType,
   amountOut: float,
@@ -80,7 +80,7 @@ type transfer = {
   toCurrency: Currency.currencyType,
   amount: float,
   description: string,
-  category: Budget.category,
+  category: Budget.Category.t,
   createdAt: int,
   updatedAt: int
 };
