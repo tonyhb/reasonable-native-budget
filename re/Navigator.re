@@ -1,19 +1,15 @@
-
-type globalArgs = {
-	budget: array(Budget.group),
-};
-
-let initialArgs = {
-	budget: [||]
-};
-
 let c = ReasonReact.statelessComponent("Navigator");
 
-let make = (~budget, _children) => {
+let make = (~budget, ~updateBudget, _children) => {
 	...c,
 	render: _self => 
 		<RRNavigation.NativeRouter>
 			<RRNavigation.Navigation hideNavBar=true>
+				<RRNavigation.Card
+					exact=true
+					path="/onboarding/accounts"
+					render=(({ push }) => <OnboardingAccounts push budget={budget} updateBudget={updateBudget} />)
+				/>
 				<RRNavigation.Card
 					exact=true
 					path="/"
