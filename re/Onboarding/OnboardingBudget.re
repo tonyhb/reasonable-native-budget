@@ -5,7 +5,8 @@ open SectionList;
 let defaultStandardBudget =
   Budget.basic
   |> Array.map(
-       (group) => SectionList.section(~data=group.Budget.Group.data, ~key=group.Budget.Group.name, ())
+       (group) =>
+         SectionList.section(~data=group.Budget.Group.data, ~key=group.Budget.Group.name, ())
      )
   |> SectionList.sections;
 
@@ -104,34 +105,14 @@ let styles =
 
 let c = ReasonReact.reducerComponent("Onboarding.BudgetWrapper");
 
-let make = (~nav as _nav: ReactNavigation.Navigation.t({.}), _children) => {
+let make = (~budget, ~push: RRNavigation.History.push('state), ~updateBudget, _children) => {
   let sectionsOfBudget = (budget) =>
     budget
     |> Array.map(
-         (group) => SectionList.section(~data=group.Budget.Group.data, ~key=group.Budget.Group.name, ())
+         (group) =>
+           SectionList.section(~data=group.Budget.Group.data, ~key=group.Budget.Group.name, ())
        )
     |> SectionList.sections;
-  let saveBudget = (groups) => {
-    let json =
-      groups |> Array.map(Budget.Group.JSON.marshal) |> Json.Encode.jsonArray |> Js.Json.stringify;
-    AsyncStorage.setItem(
-      "budget",
-      json,
-      ~callback=
-        (err) =>
-          switch err {
-          | Some(_e) =>
-            Alert.alert(
-              ~title="Uh oh",
-              ~message="We couldn't save your budget.  Is your phone full?",
-              ()
-            )
-          | None => ()
-          },
-      ()
-    )
-    |> ignore
-  };
   {
     ...c,
     initialState: () => {budget: Budget.basic},
@@ -139,40 +120,21 @@ let make = (~nav as _nav: ReactNavigation.Navigation.t({.}), _children) => {
       switch action {
       | UpdateGroup(group) =>
         ReasonReact.Update({
-          budget: state.budget |> Array.map((item) => item.Budget.Group.id == group.id ? group : item)
+          budget:
+            state.budget |> Array.map((item) => item.Budget.Group.id == group.id ? group : item)
         })
       | UpdateCategory(cat) =>
         ReasonReact.Update({
-          budget: state.budget |> Array.map((group) => Budget.Group.updateCategoryInGroup(group, cat))
+          budget:
+            state.budget |> Array.map((group) => Budget.Group.updateCategoryInGroup(group, cat))
         })
       | RemoveCategory(cat) =>
         ReasonReact.Update({
-          budget: state.budget |> Array.map((group) => Budget.Group.removeCategoryFromGroup(group, cat))
+          budget:
+            state.budget |> Array.map((group) => Budget.Group.removeCategoryFromGroup(group, cat))
         })
       | ResetBudget(budget) => ReasonReact.Update({budget: budget})
       },
-    didMount: (self) => {
-      AsyncStorage.getItem("budget", ())
-      |> Js.Promise.then_(
-           (res) => {
-             switch res {
-             | None => ()
-             | Some(json) =>
-               self.reduce(
-                 () =>
-                   ResetBudget(
-                     json |> Js.Json.parseExn |> Json.Decode.array(Budget.Group.JSON.unmarshal)
-                   ),
-                 ()
-               )
-             };
-             Js.Promise.resolve()
-           }
-         )
-      |> ignore;
-      /* No immediate update */
-      ReasonReact.NoUpdate
-    },
     render: (self) =>
       <OnboardingCommon.Wrapper>
         <OnboardingCommon.Header
@@ -211,7 +173,17 @@ let make = (~nav as _nav: ReactNavigation.Navigation.t({.}), _children) => {
             <Form.Button
               style=Style.(style([fontFamily("LFTEtica-Bold"), color("#fff")]))
               value="Continue"
-              onPress=(self.handle((_t, self) => saveBudget(self.state.budget)))
+              onPress=(
+                self.handle(
+                  (_t, self) => {
+                    let newBudget: Budget.t = {...budget, budget: self.state.budget};
+                    updateBudget(
+                      ~budget=newBudget,
+                      ~sideEffect=Some(() => push("/home", Js.Obj.empty()))
+                    )
+                  }
+                )
+              )
             />
           </View>
         </View>
