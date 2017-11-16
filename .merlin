@@ -19,6 +19,8 @@ S re/Onboarding
 B lib/bs/re/Onboarding
 S re/RRNavigation
 B lib/bs/re/RRNavigation
+S re/Welcome
+B lib/bs/re/Welcome
 S re/Shared
 B lib/bs/re/Shared
 S re/types
