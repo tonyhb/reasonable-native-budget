@@ -54,3 +54,5 @@ buck-out/
 
 # reasonml
 lib/
+.bsb.lock
+.merlin
