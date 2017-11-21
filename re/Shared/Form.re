@@ -1,9 +1,16 @@
 open ReactNative;
 
-let applyStyle = (default, extra) =>
+let applyStyle = (style, extra) =>
   switch extra {
-  | None => default
-  | Some(s) => StyleSheet.flatten([default, s])
+  | None => style
+  | Some(s) => StyleSheet.flatten([style, s])
+  };
+
+let applyTextAlign = (style, textAlign) =>
+  switch textAlign {
+  | None => style
+  | Some(`right) => StyleSheet.flatten([style, Style.style([Style.textAlign(`right)])])
+  | Some(`center) => StyleSheet.flatten([style, Style.style([Style.textAlign(`center)])])
   };
 
 module Button = {
@@ -71,17 +78,11 @@ module Label = {
   let c = ReasonReact.statelessComponent("Form.Label");
   let make = (~textAlign=?, ~value, _children) => {
     ...c,
-    render: (_self) => {
-      let style =
-        switch textAlign {
-        | Some(`right) =>
-          StyleSheet.flatten([styles##label, Style.style([Style.textAlign(`right)])])
-        | Some(`center) =>
-          StyleSheet.flatten([styles##label, Style.style([Style.textAlign(`center)])])
-        | _ => styles##label
-        };
-      <Text style value=(Js.String.toUpperCase(value)) />
-    }
+    render: (_self) =>
+      <Text
+        style=(textAlign |> applyTextAlign(styles##label))
+        value=(Js.String.toUpperCase(value))
+      />
   };
 };
 
@@ -325,18 +326,7 @@ module ModalPicker = {
     render: (self) =>
       <View>
         <TouchableOpacity onPress=(self.reduce(() => ShowModal))>
-          <Text
-            value=selectedValue
-            style=(
-              switch textAlign {
-              | Some(`right) =>
-                StyleSheet.flatten([styles##input, Style.style([Style.textAlign(`right)])])
-              | Some(`center) =>
-                StyleSheet.flatten([styles##input, Style.style([Style.textAlign(`center)])])
-              | _ => styles##input
-              }
-            )
-          />
+          <Text value=selectedValue style=(textAlign |> applyTextAlign(styles##input)) />
         </TouchableOpacity>
         <Modal visible=self.state>
           <ScrollView contentContainerStyle=styles##list>
