@@ -98,7 +98,7 @@ module OnboardingAccount = {
                 />
               </Form.Field>
               <Form.Field style=Style.(style([flex(3.)]))>
-                <Form.Label rightAlign=true value="Starting Balance" />
+                <Form.Label textAlign=`right value="Starting Balance" />
                 <Form.MoneyInput
                   onChangeFloat=(self.reduce((value) => UpdateBalance(value)))
                   value=("$" ++ Printf.sprintf("%.2f", self.state.account.balance))
@@ -186,7 +186,7 @@ let make = (~budget: Budget.t, ~updateBudget, ~push, _children) => {
       {
         id: Uuid.gen(),
         balance: 100.,
-        name: "My checking account",
+        name: "Checking account",
         currency: Currency.defaultCurrencyType,
         accountType: Account.Checking(Checking.default)
       },

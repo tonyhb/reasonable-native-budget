@@ -34,12 +34,15 @@ module Header = {
     );
   let c = ReasonReact.statelessComponent("Home.Header");
   let make = (~amount: float, _children) => {
+    let centAmount = Printf.sprintf("%.0f", mod_float(amount, 1.) *. 100.);
+    {
     ...c,
     render: (_self) =>
       <View style=styles##header>
         <Text value=("$" ++ Printf.sprintf("%.0f", floor(amount))) style=styles##amount />
-        <Text value=(Printf.sprintf("%.0f", mod_float(amount, 1.) *. 100.)) style=styles##cent />
+        <Text value=(centAmount == "0" ? "00" : centAmount) style=styles##cent />
       </View>
+    };
   };
 };
 
@@ -66,9 +69,14 @@ let make = (~budget, ~push, _children) => {
   ...component,
   render: (_self) =>
     <ScrollView style=styles##wrapper contentContainerStyle=styles##wrapperInner>
-      <Header amount=1999.99 />
+      <Header
+        amount=(
+          budget.Budget.accounts
+          |> Array.fold_left((total, acc) => total +. acc.Account.balance, 0.)
+        )
+      />
       <View style=styles##content>
-        <TouchableOpacity>
+        <TouchableOpacity onPress=(fun () => push("/entries/new", Js.Obj.empty()))>
           <Card style=styles##add>
             <Text value="Add" style=styles##addHeader />
             <Text value="an entry to your budget" style=styles##addText />

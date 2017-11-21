@@ -108,12 +108,7 @@ module TextInput = {
         }
       )
     );
-  type state = {
-    /* The typed in value */
-    value: string,
-    /* The autocomplete value */
-    autocomplete: option(string)
-  };
+  type state = string;
   type actions =
     | Change(string);
   let c = ReasonReact.reducerComponent("TextInput");
@@ -122,12 +117,82 @@ module TextInput = {
    */
   let make =
       (
-        ~style=?,
-        ~value,
+        ~value: string,
         ~onChangeText=?,
         ~onEndEditing=?,
+        ~textAlign=?,
+        ~autoFocus=false,
+        ~style=?,
         ~selectTextOnFocus=false,
-        ~autocomplete: option(list(string))=?,
+        _children
+      ) => {
+    /* onEnd is a function that calls onEndEditing with the current value, if passed from the parent */
+    let onEnd = (_evt, self) =>
+      switch onEndEditing {
+      | Some(f) => f(self.ReasonReact.state)
+      | None => ()
+      };
+    {
+      ...c,
+      initialState: () => value,
+      reducer: (action, _state) =>
+        switch action {
+        | Change(newValue) => ReasonReact.Update(newValue)
+        },
+      render: (self) =>
+        <ReactNative.TextInput
+          underlineColorAndroid="transparent"
+          onChangeText=(
+            self.reduce(
+              (text) => {
+                /* Trigger the onChangeText event from the parent if passed down */
+                switch onChangeText {
+                | Some(t) => t(text)
+                | _ => ()
+                };
+                /* Update the component's internal value */
+                Change(text)
+              }
+            )
+          )
+          onEndEditing=(self.handle(onEnd))
+          value=self.state
+          autoFocus
+          selectTextOnFocus
+          style=(style |> applyStyle(textAlign |> applyTextAlign(styles##input)))
+        />
+    }
+  };
+};
+
+module Autocomplete = {
+  type autocompleteItem('a) = {
+    item: 'a,
+    text: string /** The text value used to match autocompletes */
+  };
+
+  type state = {
+    /* The typed in value */
+    value: string,
+    /* The autocomplete value */
+    autocomplete: option(string)
+  };
+
+  type actions =
+    | Change(string);
+  let c = ReasonReact.reducerComponent("TextInput");
+  /**
+    TODO: Make autocomplete a prefix trie for speed
+   */
+  let make =
+      (
+        ~value: string,
+        ~autocomplete: list(autocompleteItem('a)),
+        ~onChangeText=?,
+        ~onEndEditing=?,
+        ~textAlign=?,
+        ~style=?,
+        ~selectTextOnFocus=false,
         _children
       ) => {
     /* onEnd is a function that calls onEndEditing with the current value, if passed from the parent */
@@ -138,31 +203,27 @@ module TextInput = {
       };
     {
       ...c,
-      initialState: () => {value, autocomplete: None},
+      initialState: () => {value: value, autocomplete: None},
       reducer: (action, state) =>
         switch action {
         | Change(newValue) =>
-          /* Find whether there's an autocomplete that satisfies our text */
-          switch autocomplete {
-          | Some(items) =>
-            /*
-              Only find a new autocomplete if we've added extra input to our value;
-              if we're deleting characters we shouldn't attempt to autocomplete
-             */
-            if (Js.String.length(state.value) < Js.String.length(newValue)) {
-              switch (
-                items
-                |> List.find(
-                     (item) => item |> Js.String.indexOf(newValue |> Js.String.toLowerCase) > (-1)
-                   )
-              ) {
-              | item => ReasonReact.Update({value: newValue, autocomplete: Some(item)})
-              | exception Not_found => ReasonReact.Update({value: newValue, autocomplete: None})
-              }
-            } else {
-              ReasonReact.Update({value: newValue, autocomplete: None})
+          /*
+            Find whether there's an autocomplete that satisfies our text.
+            Only find a new autocomplete if we've added extra input to our value;
+            if we're deleting characters we shouldn't attempt to autocomplete
+           */
+          if (Js.String.length(state.value) < Js.String.length(newValue)) {
+            switch (
+              autocomplete
+              |> List.find(
+                   (item: autocompleteItem('a)) => item.text |> Js.String.indexOf(newValue |> Js.String.toLowerCase) > (-1)
+                 )
+            ) {
+            | item => ReasonReact.Update({value: newValue, autocomplete: Some(item.text)})
+            | exception Not_found => ReasonReact.Update({value: newValue, autocomplete: None})
             }
-          | None => ReasonReact.Update({value: newValue, autocomplete: None})
+          } else {
+            ReasonReact.Update({value: newValue, autocomplete: None})
           }
         },
       render: (self) =>
@@ -201,14 +262,14 @@ module TextInput = {
             }
           )
           selectTextOnFocus
-          style=(applyStyle(styles##input, style))
+          style=(style |> applyStyle(textAlign |> applyTextAlign(TextInput.styles##input)))
         />
     }
   };
 };
 
 /*
- MoneyInp0ut is a text input which stores the text representation of a float in
+ MoneyInput is a text input which stores the text representation of a float in
  its internal state and propagates the changed value to the given onChangeFloat handler
  after the monetary value has finished editing.
  */
@@ -219,7 +280,8 @@ module MoneyInput = {
   /* with retained props as the blur handler calls a prop which passes new props -
      the formatted string */
   let c = ReasonReact.reducerComponent("Form.MoneyInput");
-  let make = (~style=?, ~value, ~onChangeFloat, ~selectTextOnFocus=true, _children) => {
+  let make =
+      (~style=?, ~value, ~onChangeFloat, ~selectTextOnFocus=true, ~autoFocus=false, _children) => {
     let handleBlur = (_evt, self) => {
       let regex = [%bs.re "/[^0-9.]/g"];
       self.ReasonReact.state
@@ -240,6 +302,7 @@ module MoneyInput = {
           keyboardType=`numeric
           value=self.state
           selectTextOnFocus
+          autoFocus
           onChangeText=(self.reduce((text) => Change(text)))
           onBlur=(self.handle(handleBlur))
           style=(applyStyle(TextInput.styles##input, style))
@@ -273,7 +336,8 @@ module Picker = {
   showing available optioons within a list according to the options specified.
 
   TODO: move the values into a SectionList type and render a SectionList of
-  values here.
+  values here.  Also, we may want to render our own content here - for example, a left and
+  right panel.
  */
 module ModalPicker = {
   let styles =
@@ -314,6 +378,8 @@ module ModalPicker = {
   type action =
     | ShowModal
     | HideModal;
+  let showModal = fun (_evt) => ShowModal;
+  let hideModal = fun (_evt) => HideModal;
   let c = ReasonReact.reducerComponent("Form.ModalPicker");
   let make = (~selectedValue, ~onValueChange, ~values, ~textAlign=?, ~modalHint=?, _children) => {
     ...c,
@@ -323,12 +389,12 @@ module ModalPicker = {
       | ShowModal => ReasonReact.Update(true)
       | HideModal => ReasonReact.Update(false)
       },
-    render: (self) =>
+    render: ({ state, reduce }) =>
       <View>
-        <TouchableOpacity onPress=(self.reduce(() => ShowModal))>
+        <TouchableOpacity onPress=(reduce(showModal))>
           <Text value=selectedValue style=(textAlign |> applyTextAlign(styles##input)) />
         </TouchableOpacity>
-        <Modal visible=self.state>
+        <Modal visible=state onRequestClose=(reduce(hideModal))>
           <ScrollView contentContainerStyle=styles##list>
             (
               switch modalHint {
@@ -345,7 +411,7 @@ module ModalPicker = {
                        onPress=(
                          () => {
                            onValueChange(value.item);
-                           self.reduce(() => HideModal, ())
+                           reduce(hideModal)();
                          }
                        )>
                        <View style=styles##listItem>

@@ -10,7 +10,6 @@ let make = (~budget: Budget.t, ~hasBudget: bool, ~updateBudget, _children) => {
 					 done loading will either navigate to "Home" or show a button to get started */
 							<RRNavigation.Navigation hideNavBar=true>
 								<RRNavigation.Card
-									exact=true
 									path="/"
 									render=(({history}) => <Welcome hasBudget budget push=history.push />)
 								/>
@@ -33,10 +32,19 @@ let make = (~budget: Budget.t, ~hasBudget: bool, ~updateBudget, _children) => {
 											/>
 									)
 								/>
+								/*
+								 This route, although the same as Welcome, is necessary such that
+								 OnboardingBudget can redirect when we have a budget to show the
+								 correct homepage */
 								<RRNavigation.Card
 									exact=true
 									path="/home"
 									render=(({history}) => <Home budget push=history.push />)
+								/>
+								<RRNavigation.Card
+									exact=true
+									path="/entries/new"
+									render=(({history}) => <NewEntry budget push=history.push />)
 								/>
 						</RRNavigation.Navigation>
 		</RRNavigation.NativeRouter>

@@ -6,7 +6,7 @@ let defaultStandardBudget =
   Budget.basic
   |> Array.map(
        (group) =>
-         SectionList.section(~data=group.Budget.Group.data, ~key=group.Budget.Group.name, ())
+         SectionList.section(~data=group.Group.data, ~key=group.Group.name, ())
      )
   |> SectionList.sections;
 
@@ -51,7 +51,7 @@ module BudgetCategory = {
       )
     );
   let c = ReasonReact.statelessComponent("Onboarding.BudgetParent");
-  let make = (~category: Budget.Category.t, ~onChange, ~onRemove, _children) => {
+  let make = (~category: Category.t, ~onChange, ~onRemove, _children) => {
     let updateName = (name) => onChange({...category, name}, ());
     let updateAmount = (amount) => onChange({...category, amount}, ());
     {
@@ -76,13 +76,13 @@ module BudgetCategory = {
   };
 };
 
-type state = {budget: array(Budget.Group.t)};
+type state = {budget: array(Group.t)};
 
 type actions =
-  | ResetBudget(array(Budget.Group.t))
-  | UpdateGroup(Budget.Group.t)
-  | UpdateCategory(Budget.Category.t)
-  | RemoveCategory(Budget.Category.t);
+  | ResetBudget(array(Group.t))
+  | UpdateGroup(Group.t)
+  | UpdateCategory(Category.t)
+  | RemoveCategory(Category.t);
 
 let styles =
   StyleSheet.create(
@@ -110,7 +110,7 @@ let make = (~budget, ~push: RRNavigation.History.push('state), ~updateBudget, _c
     budget
     |> Array.map(
          (group) =>
-           SectionList.section(~data=group.Budget.Group.data, ~key=group.Budget.Group.name, ())
+           SectionList.section(~data=group.Group.data, ~key=group.Group.name, ())
        )
     |> SectionList.sections;
   {
@@ -121,17 +121,17 @@ let make = (~budget, ~push: RRNavigation.History.push('state), ~updateBudget, _c
       | UpdateGroup(group) =>
         ReasonReact.Update({
           budget:
-            state.budget |> Array.map((item) => item.Budget.Group.id == group.id ? group : item)
+            state.budget |> Array.map((item) => item.Group.id == group.id ? group : item)
         })
       | UpdateCategory(cat) =>
         ReasonReact.Update({
           budget:
-            state.budget |> Array.map((group) => Budget.Group.updateCategoryInGroup(group, cat))
+            state.budget |> Array.map((group) => Group.updateCategoryInGroup(group, cat))
         })
       | RemoveCategory(cat) =>
         ReasonReact.Update({
           budget:
-            state.budget |> Array.map((group) => Budget.Group.removeCategoryFromGroup(group, cat))
+            state.budget |> Array.map((group) => Group.removeCategoryFromGroup(group, cat))
         })
       | ResetBudget(budget) => ReasonReact.Update({budget: budget})
       },
@@ -166,7 +166,7 @@ let make = (~budget, ~push: RRNavigation.History.push('state), ~updateBudget, _c
             style=styles##total
             value=(
               "BUDGETED  TOTAL, MONTHLY: $"
-              ++ Printf.sprintf("%.2f", Budget.Group.total(self.state.budget))
+              ++ Printf.sprintf("%.2f", Group.total(self.state.budget))
             )
           />
           <View style=Style.(style([flexDirection(`row), justifyContent(`center)]))>
