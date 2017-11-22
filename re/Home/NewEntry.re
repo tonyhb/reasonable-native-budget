@@ -8,11 +8,27 @@ type action =
   | UpdateAccount(Account.t)
   | UpdateCategory(Category.t)
   | UpdateDescription(string)
-  | UpdateRecipientName(string);
+  | UpdateRecipient(Recipient.t);
+
+let updateRecipient = (recip) => UpdateRecipient(recip);
 
 let c = ReasonReact.reducerComponent("NewEntry");
 
-                let recipient: Recipient.t = {id: "", name: "trader joes", defaultCategory: None};
+module RecipientAutocomplete =
+  Form.AutocompleteMaker(
+    {
+      type item = Recipient.t;
+    }
+  );
+
+let recipients: list(Recipient.t) = [
+  {id: "", name: "trader joes", defaultCategory: None},
+  {id: "", name: "trader schmoes", defaultCategory: None}
+];
+
+let recipientList =
+  recipients
+  |> List.map(fun (r) => ({textValue: r.name, item: r}: RecipientAutocomplete.autocompleteItem));
 
 let make = (~budget, ~push, _children) => {
   ...c,
@@ -37,6 +53,10 @@ let make = (~budget, ~push, _children) => {
     | UpdateCategory(cat) => ReasonReact.Update({entry: {...state.entry, category: Some(cat)}})
     | UpdateDescription(desc) =>
       ReasonReact.Update({entry: {...state.entry, description: Some(desc)}})
+    | UpdateRecipient(r) =>
+      ReasonReact.Update({
+        entry: {...state.entry, entryType: (Types.Expense({recipient: Some(r), expensable: false, tags: []})) }
+      })
     | _ => ReasonReact.NoUpdate
     },
   render: (self) =>
@@ -73,6 +93,17 @@ let make = (~budget, ~push, _children) => {
         <View style=Style.(style([flex(1.)]))>
           <Form.Field>
             <Form.Label value="Place or name" textAlign=`center />
+            <RecipientAutocomplete
+              value=""
+              autocomplete=recipientList
+              onEndEditing=(
+                (text, item) =>
+                  switch item {
+                  | Some(recipient) => self.reduce(() => updateRecipient(recipient), ())
+                  | _ => Alert.alert(~title="no", ~message="nop" ++ text, ())
+                  }
+              )
+            />
           </Form.Field>
         </View>
         <View style=Style.(style([flex(1.)]))>
