@@ -1,13 +1,58 @@
 type t = {
   settings: Settings.t,
   budget: array(Group.t),
-  accounts: array(Account.t)
+  accounts: array(Account.t),
+  recipients: list(Recipient.t),
+  entries: list(Entry.t)
 };
 
 let blankBudget = () => {
   settings: {defaultCurrency: Currency.defaultCurrencyType},
   budget: [||],
-  accounts: [||]
+  accounts: [||],
+  recipients: [],
+  entries: []
+};
+
+/** TODO: Based on category and createdAt, is this worth double/triple points in your credit card etc?  */
+let entry = (t): Entry.t => {
+  id: Uuid.gen(),
+  date: Js.Date.now(),
+  description: None,
+  amount: 0.,
+  source: t.accounts[0],
+  currency: t.settings.Settings.defaultCurrency,
+  category: None,
+  entryType: Expense({recipient: None, expensable: false, tags: []}),
+  createdAt: 0.,
+  updatedAt: 0.
+};
+
+let addRecipient = (t: t, recipient: option(Recipient.t)): (t,option(Recipient.t)) => {
+  switch recipient {
+    | None => (t, None);
+    | Some(r) => {
+      let (l, recipient) = Recipient.append(t.recipients, r);
+      ({...t, recipients: l }, Some(recipient));
+    }
+  }
+};
+
+
+let addEntry = (t: t, entry: Entry.t): t => {
+  let newBudget = t;
+
+  switch entry.entryType {
+    | Entry.Expense(e) => {
+      /** Ensure we add the recipient **/
+      let (newBudget, recipient) = addRecipient(newBudget, e.recipient);
+      /** The recipient may have a new ID, so append it to the entry **/
+      /** TODO: Can we tidy this up, maybe make this a tuple? **/
+      let entry = { ...entry, entryType: Entry.Expense({...e, recipient }) };
+      {...newBudget, entries: [entry, ...t.entries] };
+    }
+    | _ => t
+  };
 };
 
 module JSON = {
@@ -23,7 +68,9 @@ module JSON = {
     Json.Decode.{
       settings: json |> field("settings", Settings.JSON.unmarshal),
       budget: json |> field("budget", array(Group.JSON.unmarshal)),
-      accounts: json |> field("accounts", array(Account.JSON.unmarshal))
+      accounts: json |> field("accounts", array(Account.JSON.unmarshal)),
+      recipients: [],
+      entries: []
     };
 };
 

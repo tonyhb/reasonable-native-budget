@@ -9,6 +9,7 @@ let applyStyle = (style, extra) =>
 let applyTextAlign = (style, textAlign) =>
   switch textAlign {
   | None => style
+  | Some(`left) => style
   | Some(`right) => StyleSheet.flatten([style, Style.style([Style.textAlign(`right)])])
   | Some(`center) => StyleSheet.flatten([style, Style.style([Style.textAlign(`center)])])
   };
@@ -29,20 +30,21 @@ module Button = {
       )
     );
   let c = ReasonReact.statelessComponent("Form.Button");
-  let make = (~value: string, ~onPress, ~style=?, _children) => {
+  let make = (~value: string, ~onPress, ~textAlign=?, ~style=?, _children) => {
     ...c,
     render: (_self) =>
       <TouchableOpacity onPress>
-        <Text style=(applyStyle(styles##text, style)) value />
+        <Text style=(textAlign |> applyTextAlign(applyStyle(styles##text, style))) value />
       </TouchableOpacity>
   };
 };
 
 module PrimaryButton = {
   let c = ReasonReact.statelessComponent("Form.DesructiveButton");
-  let make = (~value: string, ~onPress, _children) => {
+  let make = (~value: string, ~onPress, ~textAlign=`left, _children) => {
     ...c,
-    render: (_self) => <Button value onPress style=Style.(style([fontFamily("LFTEtica-Bold")])) />
+    render: (_self) =>
+      <Button value onPress textAlign style=Style.(style([fontFamily("LFTEtica-Bold")])) />
   };
 };
 
@@ -325,6 +327,58 @@ module ModalPicker = {
   };
 };
 
+module DatePicker = {
+  type state = {renderIosPicker: bool};
+  type action =
+    | Show
+    | Hide;
+  let c = ReasonReact.reducerComponent("Form.DatePicker");
+  let make = (~date, ~onChange, ~textAlign=?, _children) => {
+    let handleClick = (_evt, self) =>
+      switch Platform.os {
+      | Platform.IOS => self.ReasonReact.reduce(() => Show, ())
+      | Platform.Android =>
+        DatePickerAndroid.open_(~date, ())
+        |> Js.Promise.then_(
+             fun
+             | DatePickerAndroid.Set((resp: DatePickerAndroid.response)) => {
+                 onChange(
+                   Js.Date.makeWithYMD(
+                     ~year=float_of_int(resp.year),
+                     ~month=float_of_int(resp.month),
+                     ~date=float_of_int(resp.day),
+                     ()
+                   )
+                 );
+                 Js.Promise.resolve()
+               }
+             | Dismissed => Js.Promise.resolve()
+           )
+        |> ignore
+      };
+    {
+      ...c,
+      initialState: () => {renderIosPicker: false},
+      reducer: (action, _state) =>
+        switch action {
+        | Show => ReasonReact.Update({renderIosPicker: true})
+        | Hide => ReasonReact.Update({renderIosPicker: false})
+        },
+      render: ({state, handle}) =>
+        switch state.renderIosPicker {
+        | false =>
+          <TouchableOpacity onPress=(handle(handleClick))>
+            <Text
+              value=(DateFormat.long(date))
+              style=(textAlign |> applyTextAlign(TextInput.styles##input))
+            />
+          </TouchableOpacity>
+        | true => <DatePickerIOS date mode=`date onDateChange=onChange />
+        }
+    }
+  };
+};
+
 /*
     The module interface for an autocomplete component.  `item` is the type of
     item we're autocomplete searching for.
@@ -366,17 +420,15 @@ module AutocompleteMaker = (Res: Autocompleter) => {
       onEnd is a function that calls onEndEditing from props with the current text value
       of the input box and, if available, the autocomplete item used to fill the entry.
     */
-    let onEnd = (_evt, self) => {
+    let onEnd = (_evt, self) =>
       switch onEndEditing {
-        | Some(f) => {
-          switch self.ReasonReact.state.autocomplete {
-          | Some(ac) => f(ac.textValue, Some(ac.item)); /* Use the autocomplete text value; we may have not typed in the full value */
-          | None => f(self.ReasonReact.state.value, None);
-          };
+      | Some(f) =>
+        switch self.ReasonReact.state.autocomplete {
+        | Some(ac) => f(ac.textValue, Some(ac.item)) /* Use the autocomplete text value; we may have not typed in the full value */
+        | None => f(self.ReasonReact.state.value, None)
         }
-        | None => ()
+      | None => ()
       };
-    };
     {
       ...c,
       initialState: () => {value, autocomplete: None},
@@ -394,8 +446,7 @@ module AutocompleteMaker = (Res: Autocompleter) => {
                 autocomplete
                 |> List.find(
                      (item: autocompleteItem) =>
-                       item.textValue
-                       |> Js.String.indexOf(newValue |> Js.String.toLowerCase) > (-1)
+                       item.textValue |> Js.String.indexOf(newValue |> Js.String.toLowerCase) == 0
                    )
               ) {
               | item => {value: newValue, autocomplete: Some(item)}

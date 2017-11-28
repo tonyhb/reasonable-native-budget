@@ -1,25 +1,6 @@
-type occurence =
-  | Yearly
-  | Monthly
-  | Semimonthly
-  | Biweekly
-  | Weekly
-  | Daily;
-
-type subscription = {
-  id: string,
-  name: string,
-  description: string,
-  amount: float,
-  account: Account.t, /* The account that this will be debited from */
-  currency: Currency.currencyType, /* The currency that the subscription is in */
-  occurence, /* How often this subscription occurs */
-  defaultCategory: Category.t /* A default category for the subscription expense */
-};
-
 type latlng = (float, float);
 
-/* Let you tag entries, eg. under "Ibiza Trip" to see totals for the ibiza trip */
+/* Let you tag entries, eg. under "Thanksgiving 2017" to see totals for thanksgiving 2017 */
 type tag = string;
 
 /*** Entry types **/
@@ -28,7 +9,6 @@ type income = {
   amountIn: float
 };
 
-  /** TODO: Based on category and createdAt, is this worth double/triple points in your credit card etc?  */
 type expense = {
   recipient: option(Recipient.t), /* Possible to have no recipients, but not very cool */
   expensable: bool,
@@ -36,7 +16,7 @@ type expense = {
 };
 
 type subscriptionExpense = {
-  subscription,
+  subscription: Subscription.t,
   expense
 };
 
@@ -53,7 +33,7 @@ type entryType =
   | SubscriptionExpense(subscriptionExpense)
   | Transfer(transfer);
 
-type entry = {
+type t = {
   id: string,
   date: float,
   source: Account.t,
