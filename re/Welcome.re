@@ -27,16 +27,16 @@ let styles =
 
 let c = ReasonReact.statelessComponent("Onboarding.Intro");
 
-let make = (~push, ~hasBudget, ~budget, _children) => {
+let make = (~hasBudget, ~budget, ~nav, _children) => {
 	{
 	...c,
 	render: (_self) =>
 		switch (hasBudget) {
-		| true => <Home push budget />
+		| true => <Home budget nav />
 		| false =>
 		<View style=styles##wrapper>
 			<Text style=styles##title value="App Name" />
-			<TouchableOpacity onPress=((_evt) => push("/onboarding/accounts", Js.Obj.empty()))>
+			<TouchableOpacity onPress=((_evt) => Alert.alert(~title="foo", ~message="foo", ()))>
 				<Card>
 					<Card.Content> <Text style=styles##cta value="Start new budget" /> </Card.Content>
 				</Card>

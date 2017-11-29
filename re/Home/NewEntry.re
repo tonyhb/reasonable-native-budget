@@ -32,7 +32,7 @@ let recipientList =
   recipients
   |> List.map(fun (r) => ({textValue: r.name, item: r}: RecipientAutocomplete.autocompleteItem));
 
-let make = (~budget, ~push, ~updateBudget, _children) => {
+let make = (~budget, ~updateBudget, ~nav, _children) => {
   ...c,
   initialState: () => {entry: Budget.entry(budget)},
   reducer: (action, state) =>
@@ -155,7 +155,7 @@ let make = (~budget, ~push, ~updateBudget, _children) => {
           () =>
             updateBudget(
               ~budget=Budget.addEntry(budget, self.state.entry),
-              ~sideEffect=Some(() => push("/", Js.Obj.empty()))
+              ~sideEffect=Some(() => ReactNavigation.Navigation.navigate(nav, ~routeName="/", ()))
             )
         )
       />

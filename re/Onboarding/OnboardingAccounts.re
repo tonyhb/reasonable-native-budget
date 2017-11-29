@@ -179,7 +179,7 @@ type actions =
 
 let comp = ReasonReact.reducerComponent("OnboardingAccounts");
 
-let make = (~budget: Budget.t, ~updateBudget, ~push, _children) => {
+let make = (~budget: Budget.t, ~updateBudget, ~nav, _children) => {
   ...comp,
   initialState: () => {
     accounts: [
@@ -267,7 +267,7 @@ let make = (~budget: Budget.t, ~updateBudget, ~push, _children) => {
             self.handle(
               (_a, self) => {
                 let newBudget = {...budget, accounts: self.state.accounts |> Array.of_list};
-                push("/onboarding/budget", {"budget": newBudget})
+                ReactNavigation.Navigation.navigate(nav, ~routeName="/onboarding/budget", ());
               }
             )
           )

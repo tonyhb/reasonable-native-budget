@@ -65,7 +65,7 @@ let styles =
 
 let component = ReasonReact.statelessComponent("Home");
 
-let make = (~budget, ~push, _children) => {
+let make = (~budget, ~nav, _children) => {
   ...component,
   render: (_self) =>
     <ScrollView style=styles##wrapper contentContainerStyle=styles##wrapperInner>
@@ -76,12 +76,13 @@ let make = (~budget, ~push, _children) => {
         )
       />
       <View style=styles##content>
-        <TouchableOpacity onPress=(fun () => push("/entries/new", Js.Obj.empty()))>
+        <TouchableOpacity onPress=(fun () => ReactNavigation.Navigation.navigate(nav, ~routeName="/entries/new", ()))>
           <Card style=styles##add>
             <Text value="Add" style=styles##addHeader />
             <Text value="an entry to your budget" style=styles##addText />
           </Card>
         </TouchableOpacity>
+        <Text value=(Printf.sprintf("%d", List.length(budget.entries)) ++ " entries") />
       </View>
     </ScrollView>
 };

@@ -1,52 +1,81 @@
-let c = ReasonReact.statelessComponent("Navigator");
-
-/* If hasBudget is false we need to onboard the user */
-let make = (~budget: Budget.t, ~hasBudget: bool, ~updateBudget, _children) => {
-	...c,
-	render: (_self) =>
-		<RRNavigation.NativeRouter>
-				/* The initial welcome/loading screen.  This shows a loading indicator
-					 when attempting to load the budget from async storage, and if we're
-					 done loading will either navigate to "Home" or show a button to get started */
-							<RRNavigation.Navigation hideNavBar=true>
-								<RRNavigation.Card
-									path="/"
-									render=(({history}) => <Welcome hasBudget budget push=history.push />)
-								/>
-								<RRNavigation.Card
-									exact=true
-									path="/onboarding/accounts"
-									render=(
-										({history}) => <OnboardingAccounts push=history.push budget updateBudget />
-									)
-								/>
-								<RRNavigation.Card
-									exact=true
-									path="/onboarding/budget"
-									render=(
-										({history, location}) =>
-											<OnboardingBudget
-												push=history.push
-												budget=location.state##budget
-												updateBudget
-											/>
-									)
-								/>
-								/*
-								 This route, although the same as Welcome, is necessary such that
-								 OnboardingBudget can redirect when we have a budget to show the
-								 correct homepage
-                */
-								<RRNavigation.Card
-									exact=true
-									path="/home"
-									render=(({history}) => <Home budget push=history.push />)
-								/>
-								<RRNavigation.Card
-									exact=true
-									path="/entries/new"
-									render=(({history}) => <NewEntry budget push=history.push updateBudget />)
-								/>
-						</RRNavigation.Navigation>
-		</RRNavigation.NativeRouter>
+/** TODO: Allow `/onboarding/accounts` to pass accounts/budget as navigation param for `/onboarding/budget` **/
+type navParams = {
+  .
+  "budget": option(Budget.t)
 };
+
+type screenProps = {
+  budget: Budget.t,
+  hasBudget: bool,
+  updateBudget: (~budget: Budget.t, ~sideEffect: option((unit => unit))) => unit
+};
+
+let home = (nav: ReactNavigation.Navigation.t(navParams), screenProps: screenProps) =>
+  <Welcome budget=screenProps.budget hasBudget=screenProps.hasBudget nav />;
+
+let navOptions = StackNavigatorRe.navigationOptions(~header=`notVisible, ());
+
+let routes: StackNavigatorRe.routes(screenProps, navParams) =
+  StackNavigatorRe.(
+    routes([
+      (
+        "/",
+        route(
+          ~screen=({navigation, screenProps}) => home(navigation, screenProps),
+          ~path="/",
+          ~navigationOptions=`static(navOptions),
+          ()
+        )
+      ),
+      (
+        "/onboarding/accounts",
+        route(
+          ~screen=
+            ({navigation, screenProps}) =>
+              <OnboardingAccounts
+                budget=screenProps.budget
+                updateBudget=screenProps.updateBudget
+                nav=navigation
+              />,
+          ~path="/onboarding/accounts",
+          ~navigationOptions=`static(navOptions),
+          ()
+        )
+      ),
+      (
+        "/onboarding/budget",
+        route(
+          ~screen=
+            ({navigation, screenProps}) =>
+              <OnboardingBudget
+                budget=screenProps.budget
+                updateBudget=screenProps.updateBudget
+                nav=navigation
+              />,
+          ~path="/onboarding/budget",
+          ~navigationOptions=`static(navOptions),
+          ()
+        )
+      ),
+      (
+        "/entries/new",
+        route(
+          ~screen=
+            ({navigation, screenProps}) =>
+              <NewEntry
+                budget=screenProps.budget
+                updateBudget=screenProps.updateBudget
+                nav=navigation
+              />,
+          ~path="/entries/new",
+          ~navigationOptions=`static(navOptions),
+          ()
+        )
+      )
+    ])
+  );
+
+let stackRouter = StackNavigatorRe.create(routes, None);
+
+let make = (~budget, ~hasBudget, ~updateBudget, children) =>
+  stackRouter(~screenProps={budget, hasBudget, updateBudget}, children);

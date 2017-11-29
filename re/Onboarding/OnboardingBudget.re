@@ -4,10 +4,7 @@ open SectionList;
 
 let defaultStandardBudget =
   Budget.basic
-  |> Array.map(
-       (group) =>
-         SectionList.section(~data=group.Group.data, ~key=group.Group.name, ())
-     )
+  |> Array.map((group) => SectionList.section(~data=group.Group.data, ~key=group.Group.name, ()))
   |> SectionList.sections;
 
 module GroupHeader = {
@@ -105,12 +102,11 @@ let styles =
 
 let c = ReasonReact.reducerComponent("Onboarding.BudgetWrapper");
 
-let make = (~budget, ~push: RRNavigation.History.push('state), ~updateBudget, _children) => {
+let make = (~budget, ~updateBudget, ~nav, _children) => {
   let sectionsOfBudget = (budget) =>
     budget
     |> Array.map(
-         (group) =>
-           SectionList.section(~data=group.Group.data, ~key=group.Group.name, ())
+         (group) => SectionList.section(~data=group.Group.data, ~key=group.Group.name, ())
        )
     |> SectionList.sections;
   {
@@ -120,18 +116,15 @@ let make = (~budget, ~push: RRNavigation.History.push('state), ~updateBudget, _c
       switch action {
       | UpdateGroup(group) =>
         ReasonReact.Update({
-          budget:
-            state.budget |> Array.map((item) => item.Group.id == group.id ? group : item)
+          budget: state.budget |> Array.map((item) => item.Group.id == group.id ? group : item)
         })
       | UpdateCategory(cat) =>
         ReasonReact.Update({
-          budget:
-            state.budget |> Array.map((group) => Group.updateCategoryInGroup(group, cat))
+          budget: state.budget |> Array.map((group) => Group.updateCategoryInGroup(group, cat))
         })
       | RemoveCategory(cat) =>
         ReasonReact.Update({
-          budget:
-            state.budget |> Array.map((group) => Group.removeCategoryFromGroup(group, cat))
+          budget: state.budget |> Array.map((group) => Group.removeCategoryFromGroup(group, cat))
         })
       | ResetBudget(budget) => ReasonReact.Update({budget: budget})
       },
@@ -179,7 +172,8 @@ let make = (~budget, ~push: RRNavigation.History.push('state), ~updateBudget, _c
                     let newBudget: Budget.t = {...budget, budget: self.state.budget};
                     updateBudget(
                       ~budget=newBudget,
-                      ~sideEffect=Some(() => push("/home", Js.Obj.empty()))
+                      ~sideEffect=
+                        Some(() => ReactNavigation.Navigation.navigate(nav, ~routeName="/", ()))
                     )
                   }
                 )
