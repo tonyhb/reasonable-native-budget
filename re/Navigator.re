@@ -1,8 +1,5 @@
 /** TODO: Allow `/onboarding/accounts` to pass accounts/budget as navigation param for `/onboarding/budget` **/
-type navParams = {
-  .
-  "budget": option(Budget.t)
-};
+type navParams = {. budget: option(Budget.t)};
 
 type screenProps = {
   budget: Budget.t,
@@ -32,11 +29,7 @@ let routes: StackNavigatorRe.routes(screenProps, navParams) =
         route(
           ~screen=
             ({navigation, screenProps}) =>
-              <OnboardingAccounts
-                budget=screenProps.budget
-                updateBudget=screenProps.updateBudget
-                nav=navigation
-              />,
+              <OnboardingAccounts budget=screenProps.budget nav=navigation />,
           ~path="/onboarding/accounts",
           ~navigationOptions=`static(navOptions),
           ()
@@ -46,12 +39,19 @@ let routes: StackNavigatorRe.routes(screenProps, navParams) =
         "/onboarding/budget",
         route(
           ~screen=
-            ({navigation, screenProps}) =>
+            ({navigation, screenProps}) => {
+              let budget = ReactNavigation.Navigation.state(navigation).params##budget;
               <OnboardingBudget
-                budget=screenProps.budget
+                budget=(
+                  switch budget {
+                  | Some(b) => b
+                  | None => screenProps.budget
+                  }
+                )
                 updateBudget=screenProps.updateBudget
                 nav=navigation
-              />,
+              />
+            },
           ~path="/onboarding/budget",
           ~navigationOptions=`static(navOptions),
           ()
