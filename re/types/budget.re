@@ -56,13 +56,11 @@ let addExpense = (t: t, entry: Entry.t, expense: Expense.t) => {
   }
 };
 
-
-let addEntry = (t: t, entry: Entry.t) : t => {
+let addEntry = (t: t, entry: Entry.t) : t =>
   switch entry.entryType {
   | Entry.Expense(e) => addExpense(t, entry, e)
   | _ => t
-  }
-};
+  };
 
 module JSON = {
   let marshal = (data) =>
@@ -77,18 +75,27 @@ module JSON = {
     );
   let unmarshal = (json) => {
     open Json.Decode;
-
     let accounts = json |> field("accounts", array(Account.JSON.unmarshal));
     let recipients = json |> field("recipients", list(Recipient.JSON.unmarshal));
     let budget = json |> field("budget", array(Group.JSON.unmarshal));
-
     {
       settings: json |> field("settings", Settings.JSON.unmarshal),
       budget,
       accounts,
       recipients,
-      entries: json |> field("entries", list(Entry.JSON.unmarshal(~accounts=(accounts |> Array.to_list), ~recipients, ~categories=(Group.categories(budget) |> Array.to_list)))),
-    };
+      entries:
+        json
+        |> field(
+             "entries",
+             list(
+               Entry.JSON.unmarshal(
+                 ~accounts=accounts |> Array.to_list,
+                 ~recipients,
+                 ~categories=Group.categories(budget) |> Array.to_list
+               )
+             )
+           )
+    }
   };
 };
 
@@ -109,7 +116,6 @@ module Examples = {
       |]
     )
   |];
-
   let standard: array(Group.t) = [|
     Group.group(
       ~name="Monthly expenses",

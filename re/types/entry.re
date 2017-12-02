@@ -86,7 +86,7 @@ module JSON = {
       description: json |> field("description", optional(string)),
       amount: json |> field("amount", Json.Decode.float),
       currency: json |> field("currency", Currency.JSON.unmarshal),
-      cleared: json |> field("cleard", Json.Decode.bool),
+      cleared: json |> field("cleared", Json.Decode.bool),
       createdAt: json |> field("createdAt", date_of_json),
       updatedAt: json |> field("updatedAt", date_of_json),
       entryType:

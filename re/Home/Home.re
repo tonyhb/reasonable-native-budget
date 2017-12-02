@@ -70,10 +70,7 @@ let make = (~budget, ~nav, _children) => {
   render: (_self) =>
     <ScrollView style=styles##wrapper contentContainerStyle=styles##wrapperInner>
       <Header
-        amount=(
-          budget.Budget.accounts
-          |> Array.fold_left((total, acc) => total +. acc.Account.balance, 0.)
-        )
+        amount=(Account.sum(budget.Budget.accounts |> Array.to_list))
       />
       <View style=styles##content>
         <TouchableOpacity onPress=(fun () => ReactNavigation.Navigation.navigate(nav, ~routeName="/entries/new", ()))>

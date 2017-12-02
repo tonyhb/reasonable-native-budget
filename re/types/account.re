@@ -18,14 +18,27 @@ type t = {
   accountType
 };
 
-let addBalance = (t: t, bal: float) : t => {...t, balance: t.balance +. bal};
+let isDebt =
+  fun
+  | CreditCard(_c) => true
+  | _ => false;
+
+let subtractBalance = (t: t, bal: float) => {
+  ...t,
+  balance: isDebt(t.accountType) ? t.balance +. bal : t.balance -. bal
+};
+
+let addBalance = (t: t, bal: float) : t => {
+  ...t,
+  balance: isDebt(t.accountType) ? t.balance -. bal : t.balance +. bal
+};
 
 let addBalanceToList = (accountId: string, bal: float, l: list(t)) =>
-  l
-  |> List.map(
-       (account) =>
-         account.id == accountId ? {...account, balance: account.balance +. bal} : account
-     );
+  l |> List.map((account) => account.id == accountId ? addBalance(account, bal) : account);
+
+let sum = (l) => l |> List.fold_left((total, acc) => {
+  isDebt(acc.accountType) ? total -. acc.balance : total +. acc.balance
+}, 0.);
 
 let string_of_accountType =
   fun

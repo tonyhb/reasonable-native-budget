@@ -29,7 +29,7 @@ module JSON = {
         | None => None
         },
       expensable: json |> field("expensable", bool),
-      tags: json |> field("expensable", list(string))
+      tags: json |> field("tags", list(string))
     }
   };
 };
