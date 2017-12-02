@@ -7,6 +7,14 @@ type screenProps = {
   updateBudget: (~budget: Budget.t, ~sideEffect: option((unit => unit))) => unit
 };
 
+let budget = (nav, screenProps) => {
+  let budget = ReactNavigation.Navigation.state(nav).params##budget;
+  switch budget {
+  | Some(b) => b
+  | None => screenProps.budget
+  }
+};
+
 let home = (nav: ReactNavigation.Navigation.t(navParams), screenProps: screenProps) =>
   <Welcome budget=screenProps.budget hasBudget=screenProps.hasBudget nav />;
 
@@ -40,14 +48,8 @@ let routes: StackNavigatorRe.routes(screenProps, navParams) =
         route(
           ~screen=
             ({navigation, screenProps}) => {
-              let budget = ReactNavigation.Navigation.state(navigation).params##budget;
               <OnboardingBudget
-                budget=(
-                  switch budget {
-                  | Some(b) => b
-                  | None => screenProps.budget
-                  }
-                )
+                budget=budget(navigation, screenProps)
                 updateBudget=screenProps.updateBudget
                 nav=navigation
               />

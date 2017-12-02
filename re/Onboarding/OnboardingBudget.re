@@ -3,7 +3,7 @@ open ReactNative;
 open SectionList;
 
 let defaultStandardBudget =
-  Budget.basic
+  Budget.Examples.basic
   |> Array.map((group) => SectionList.section(~data=group.Group.data, ~key=group.Group.name, ()))
   |> SectionList.sections;
 
@@ -111,7 +111,7 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
     |> SectionList.sections;
   {
     ...c,
-    initialState: () => {budget: Budget.basic},
+    initialState: () => {budget: Budget.Examples.basic},
     reducer: (action, state) =>
       switch action {
       | UpdateGroup(group) =>

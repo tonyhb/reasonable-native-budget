@@ -36,7 +36,7 @@ let make = (~hasBudget, ~budget, ~nav, _children) => {
 		| false =>
 		<View style=styles##wrapper>
 			<Text style=styles##title value="App Name" />
-			<TouchableOpacity onPress=((_evt) => Alert.alert(~title="foo", ~message="foo", ()))>
+			<TouchableOpacity onPress=((_evt) => ReactNavigation.Navigation.navigate(nav, ~routeName="/onboarding/accounts", ()))>
 				<Card>
 					<Card.Content> <Text style=styles##cta value="Start new budget" /> </Card.Content>
 				</Card>

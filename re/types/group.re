@@ -24,7 +24,7 @@ let groupTotal = (group: t) =>
 let total = (groups: array(t)) =>
   groups |> Array.fold_left((total, group) => total +. groupTotal(group), 0.);
 let categories = (groups: array(t)) =>
-  groups |> Array.fold_left((cats, group) => cats |> Js.Array.concat(group.data), [||]);
+  groups |> Array.fold_left((cats, group) => cats |> Array.append(group.data), [||]);
 module JSON = {
   let marshal = (g) =>
     Json.Encode.(

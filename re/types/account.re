@@ -9,7 +9,7 @@ type accountType =
   | Other(string);
 
 
-/*** TODO: This should depend on currency */
+/*** TODO: This balance should NEGATE overall net, not add to it */
 type t = {
   id: string,
   balance: float,
@@ -17,6 +17,15 @@ type t = {
   currency: Currency.currencyType,
   accountType
 };
+
+let addBalance = (t: t, bal: float) : t => {...t, balance: t.balance +. bal};
+
+let addBalanceToList = (accountId: string, bal: float, l: list(t)) =>
+  l
+  |> List.map(
+       (account) =>
+         account.id == accountId ? {...account, balance: account.balance +. bal} : account
+     );
 
 let string_of_accountType =
   fun
