@@ -199,6 +199,7 @@ module MoneyInput = {
       render: (self) =>
         <ReactNative.TextInput
           keyboardType=`numeric
+          underlineColorAndroid="transparent"
           value=self.state
           selectTextOnFocus
           autoFocus

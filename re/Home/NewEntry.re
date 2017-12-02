@@ -23,12 +23,7 @@ module RecipientAutocomplete =
     }
   );
 
-let recipients: list(Recipient.t) = [
-  {id: "", name: "trader joes", defaultCategory: Some(Category.category(~name="Food", ()))},
-  {id: "", name: "trader schmoes", defaultCategory: None}
-];
-
-let recipientList =
+let recipientList = (recipients) => 
   recipients
   |> List.map(fun (r) => ({textValue: r.name, item: r}: RecipientAutocomplete.autocompleteItem));
 
@@ -90,7 +85,7 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
             <Form.Label value="Place or name" textAlign=`center />
             <RecipientAutocomplete
               value=""
-              autocomplete=recipientList
+              autocomplete=(budget.Budget.recipients |> recipientList)
               textAlign=`center
               onEndEditing=(
                 (text, item) =>
