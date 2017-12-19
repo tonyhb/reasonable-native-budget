@@ -26,7 +26,7 @@
 	"dependencies": {
 		"bs-json": "^0.2.4",
 		"bs-platform": "2.0.0",
-		"bs-react-native": "^0.2.1",
+		"bs-react-native": "https://github.com/reasonml-community/bs-react-native.git#e666ef946e0682bccb9b8b983a3647728bdee450",
 		"bs-react-navigation": "https://github.com/saschatimme/bs-react-navigation.git#658773e8997be7a8ec329a18a5a24057307b21eb",
 		"react": "16.0.0",
 		"react-native": "0.50.0-rc.1",

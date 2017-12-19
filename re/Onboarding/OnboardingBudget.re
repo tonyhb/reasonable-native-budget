@@ -1,4 +1,4 @@
-open ReactNative;
+open BsReactNative;
 
 open SectionList;
 
@@ -9,7 +9,7 @@ let defaultStandardBudget =
 
 module GroupHeader = {
   let c = ReasonReact.statelessComponent("Onboarding.GroupHeader");
-  let make = (value, _children) => {...c, render: (_self) => <Text value />};
+  let make = (~value, _children) => {...c, render: (_self) => <Text value />};
 };
 
 module GroupFooter = {

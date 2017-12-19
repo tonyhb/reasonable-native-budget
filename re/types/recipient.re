@@ -7,6 +7,17 @@ type t = {
 
 let recipient = (name) => {id: Uuid.gen(), name, defaultCategory: None};
 
+/**
+  Attempts to find an existing recipient by name and returns it, or creates
+  a new recipient and returns it
+ */
+let newRecipientByName = (l: list(t), name: string): t => {
+  switch (l |> List.find((item) => item.name == name)) {
+    | item => item
+    | exception Not_found => recipient(name)
+  };
+};
+
 let append = (l: list(t), t: t): (list(t), t) =>
   l |> List.exists((item) => item.name == t.name) ?
     (l, t) :

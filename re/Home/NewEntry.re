@@ -1,4 +1,4 @@
-open ReactNative;
+open BsReactNative;
 
 type state = {entry: Entry.t};
 
@@ -91,7 +91,10 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
                 (text, item) =>
                   switch item {
                   | Some(recipient) => self.reduce(() => updateRecipient(recipient), ())
-                  | _ => self.reduce(() => UpdateRecipient(text |> Recipient.recipient), ())
+                  /* This may have been caused by a backspace in autocomplete, which means an item wouldn't
+                     match despite existing.  newRecipientByName attempts to use an existing recipient if
+                     possible */
+                  | _ => self.reduce(() => UpdateRecipient(text |> Recipient.newRecipientByName(budget.recipients)), ())
                   }
               )
             />

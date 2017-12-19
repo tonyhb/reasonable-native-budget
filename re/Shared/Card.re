@@ -1,4 +1,4 @@
-open ReactNative;
+open BsReactNative;
 
 module Content = {
   let c = ReasonReact.statelessComponent("Card.Content");

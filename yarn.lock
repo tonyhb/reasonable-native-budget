@@ -1054,15 +1054,13 @@ bs-platform@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-2.0.0.tgz#17ee607fa829f67b8b920438ebca5ec1deab3276"
 
-bs-react-native@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/bs-react-native/-/bs-react-native-0.2.1.tgz#73b98474747d803951b18cb21df817855b01fc70"
-  dependencies:
-    reason-react "^0.2.4"
-
 "bs-react-native@https://github.com/BuckleTypes/bs-react-native":
   version "0.3.0"
   resolved "https://github.com/BuckleTypes/bs-react-native#657ea7b7a7efa1ea1a2aac8813528533b204774d"
+
+"bs-react-native@https://github.com/reasonml-community/bs-react-native.git#e666ef946e0682bccb9b8b983a3647728bdee450":
+  version "0.3.0"
+  resolved "https://github.com/reasonml-community/bs-react-native.git#e666ef946e0682bccb9b8b983a3647728bdee450"
 
 "bs-react-navigation@https://github.com/saschatimme/bs-react-navigation.git#658773e8997be7a8ec329a18a5a24057307b21eb":
   version "0.0.1"

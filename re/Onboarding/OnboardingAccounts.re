@@ -1,4 +1,4 @@
-open ReactNative;
+open BsReactNative;
 
 module OnboadringAccountPreview = {
   let styles =

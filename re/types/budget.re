@@ -56,11 +56,19 @@ let addExpense = (t: t, entry: Entry.t, expense: Expense.t) => {
   }
 };
 
-let addEntry = (t: t, entry: Entry.t) : t =>
-  switch entry.entryType {
-  | Entry.Expense(e) => addExpense(t, entry, e)
-  | _ => t
-  };
+let addEntry = (t: t, entry: Entry.t) : t => {
+  let budget =
+    switch entry.entryType {
+    | Entry.Expense(e) => addExpense(t, entry, e)
+    | _ => t
+    };
+  {
+    ...budget,
+    entries:
+      budget.entries
+      |> List.stable_sort((a: Entry.t, b: Entry.t) => b.date -. a.date |> int_of_float)
+  }
+};
 
 module JSON = {
   let marshal = (data) =>

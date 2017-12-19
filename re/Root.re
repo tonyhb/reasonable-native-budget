@@ -1,4 +1,4 @@
-open ReactNative;
+open BsReactNative;
 
 type state = {
   loading: bool,
@@ -89,7 +89,7 @@ let make = (_children) => {
     render: (self) =>
       /* TODO: Nicer loading screen */
       self.state.loading ?
-        <ReactNative.Text value="loading" /> :
+        <BsReactNative.Text value="loading" /> :
         <Navigator
           budget=self.state.budget
           hasBudget=self.state.hasBudget

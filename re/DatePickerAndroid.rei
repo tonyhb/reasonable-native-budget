@@ -1,8 +1,6 @@
-[@bs.scope "DatePickerAndroid"] [@bs.module "react-native"] external dateSet : string =
-  "dateSetAction";
+let dateSet: string;
 
-[@bs.scope "DatePickerAndroid"] [@bs.module "react-native"] external dismissed : string =
-  "dismissedAction";
+let dismissed: string;
 
 type response = {
   year: int,

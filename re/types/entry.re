@@ -26,6 +26,23 @@ type t = {
   entryType
 };
 
+let rec _take = (~l: list(t), ~ret: list(t)=[], ~amount: int): list(t) => {
+  switch amount {
+    | 0 => ret
+    | _ => {
+      switch l {
+        |[] => ret
+        | [head, ...rest] => _take(~l=rest, ~ret=[head, ...ret], ~amount=(amount - 1))
+      }
+    }
+  }
+};
+
+
+let take = (amount: int, l: list(t)): list(t) => {
+  _take(~l=l, ~ret=[], ~amount=amount) |> List.rev
+};
+
 module JSON = {
   let json_of_date = (d: float) : Js.Json.t =>
     d |> Js.Date.fromFloat |> Js.Date.toISOString |> Json.Encode.string;

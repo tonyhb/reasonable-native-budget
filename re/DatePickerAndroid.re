@@ -28,8 +28,8 @@ type responseJs = {. "action": string, "year": int, "month": int, "day": int};
 type optsJs = {
   .
   "date": Js.Date.t,
-  "minDate": Js.Undefined.t(Js.Date.t),
-  "maxDate": Js.Undefined.t(Js.Date.t),
+  "minDate": Js.Nullable.t(Js.Date.t),
+  "maxDate": Js.Nullable.t(Js.Date.t),
   "mode": string
 };
 
@@ -40,8 +40,8 @@ external _open : optsJs => Js.Promise.t(responseJs) =
 let open_ = (~date: Js.Date.t, ~minDate=?, ~maxDate=?, ~mode=Default, ()) =>
   _open({
     "date": date,
-    "minDate": Js.Undefined.from_opt(minDate),
-    "maxDate": Js.Undefined.from_opt(maxDate),
+    "minDate": Js.Nullable.from_opt(minDate),
+    "maxDate": Js.Nullable.from_opt(maxDate),
     "mode":
       switch mode {
       | Default => "default"
@@ -49,9 +49,4 @@ let open_ = (~date: Js.Date.t, ~minDate=?, ~maxDate=?, ~mode=Default, ()) =>
       | Spinner => "spinner"
       }
   })
-  |> Js.Promise.then_(
-       (resp: responseJs) => {
-         let an = resp |> action;
-         Js.Promise.resolve(an)
-       }
-     );
+  |> Js.Promise.then_((resp: responseJs) => resp |> action |> Js.Promise.resolve);

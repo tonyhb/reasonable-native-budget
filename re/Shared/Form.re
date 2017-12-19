@@ -1,4 +1,4 @@
-open ReactNative;
+open BsReactNative;
 
 let applyStyle = (style, extra) =>
   switch extra {
@@ -114,9 +114,6 @@ module TextInput = {
   type actions =
     | Change(string);
   let c = ReasonReact.reducerComponent("TextInput");
-  /**
-    TODO: Make autocomplete a prefix trie for speed
-   */
   let make =
       (
         ~value: string,
@@ -142,7 +139,7 @@ module TextInput = {
         | Change(newValue) => ReasonReact.Update(newValue)
         },
       render: (self) =>
-        <ReactNative.TextInput
+        <BsReactNative.TextInput
           underlineColorAndroid="transparent"
           onChangeText=(
             self.reduce(
@@ -197,7 +194,7 @@ module MoneyInput = {
         | Change(value) => ReasonReact.Update(value)
         },
       render: (self) =>
-        <ReactNative.TextInput
+        <BsReactNative.TextInput
           keyboardType=`numeric
           underlineColorAndroid="transparent"
           value=self.state
@@ -370,7 +367,7 @@ module DatePicker = {
         | false =>
           <TouchableOpacity onPress=(handle(handleClick))>
             <Text
-              value=(DateFormat.long(date))
+              value=(DateFormat.dayMonthYear(date))
               style=(textAlign |> applyTextAlign(TextInput.styles##input))
             />
           </TouchableOpacity>
@@ -383,6 +380,7 @@ module DatePicker = {
 /*
     The module interface for an autocomplete component.  `item` is the type of
     item we're autocomplete searching for.
+    TODO: Make autocomplete a prefix trie for speed
  */
 module type Autocompleter = {type item;};
 
@@ -447,7 +445,7 @@ module AutocompleteMaker = (Res: Autocompleter) => {
                 autocomplete
                 |> List.find(
                      (item: autocompleteItem) =>
-                       item.textValue |> Js.String.indexOf(newValue |> Js.String.toLowerCase) == 0
+                       item.textValue |> Js.String.toLowerCase |> Js.String.indexOf(newValue |> Js.String.toLowerCase) == 0
                    )
               ) {
               | item => {value: newValue, autocomplete: Some(item)}
@@ -467,7 +465,7 @@ module AutocompleteMaker = (Res: Autocompleter) => {
         )
       },
       render: ({reduce, state, handle}) =>
-        <ReactNative.TextInput
+        <BsReactNative.TextInput
           underlineColorAndroid="transparent"
           onChangeText=(reduce(change))
           onEndEditing=(handle(onEnd))
