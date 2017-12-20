@@ -31,7 +31,6 @@ let make = (~budget, ~nav, _children) => {
             config=(
               PieChart.config(~colors=[|"#FFFF9D", "#5B98A0", "#79BD8F"|], ~valueTextSize=0., ())
             )
-            label="Spending"
             style=styles##introChart
             rotationAngle=270
             holeRadius=62

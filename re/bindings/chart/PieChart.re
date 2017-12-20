@@ -10,13 +10,7 @@ let value = (~label=?, value) => {value, label};
 let values = (vals: array(value)) =>
   vals |> Array.map((v) => {"value": v.value, "label": Js.Nullable.from_opt(v.label)});
 
-type animationJs = {
-  .
-  "durationX": int,
-  "durationY": int,
-  "easingX": int,
-  "easingY": int,
-};
+type animationJs = {. "durationX": int, "durationY": int, "easingX": int, "easingY": int};
 
 type descriptionJs = {
   .
@@ -73,7 +67,7 @@ let config =
 type pieChartDataJs = {
   .
   "values": array(valueJs),
-  "label": Js.Nullable.t(string),
+  "label": string, /*** Needs to be present for android, even if its empty **/
   "config": Js.Nullable.t(pieChartDataConfigJs)
 };
 
@@ -81,7 +75,11 @@ let pieChartData =
     (~label: option(string), ~config: option(pieChartDataConfigJs), ~data: array(valueJs))
     : pieChartDataJs => {
   "values": data,
-  "label": Js.Nullable.from_opt(label),
+  "label":
+    switch label {
+    | Some(s) => s
+    | _ => ""
+    },
   "config": Js.Nullable.from_opt(config)
 };
 
