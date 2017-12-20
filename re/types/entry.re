@@ -26,22 +26,17 @@ type t = {
   entryType
 };
 
-let rec _take = (~l: list(t), ~ret: list(t)=[], ~amount: int): list(t) => {
+let rec _take = (~l: list(t), ~ret: list(t)=[], ~amount: int) : list(t) =>
   switch amount {
-    | 0 => ret
-    | _ => {
-      switch l {
-        |[] => ret
-        | [head, ...rest] => _take(~l=rest, ~ret=[head, ...ret], ~amount=(amount - 1))
-      }
+  | 0 => ret
+  | _ =>
+    switch l {
+    | [] => ret
+    | [head, ...rest] => _take(~l=rest, ~ret=[head, ...ret], ~amount=amount - 1)
     }
-  }
-};
+  };
 
-
-let take = (amount: int, l: list(t)): list(t) => {
-  _take(~l=l, ~ret=[], ~amount=amount) |> List.rev
-};
+let take = (amount: int, l: list(t)) : list(t) => _take(~l, ~ret=[], ~amount) |> List.rev;
 
 module JSON = {
   let json_of_date = (d: float) : Js.Json.t =>

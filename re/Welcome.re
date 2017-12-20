@@ -25,7 +25,7 @@ let styles =
     )
   );
 
-let c = ReasonReact.statelessComponent("Onboarding.Intro");
+let c = ReasonReact.statelessComponent("Welcome");
 
 let make = (~hasBudget, ~budget, ~nav, _children) => {
   ...c,
@@ -40,7 +40,7 @@ let make = (~hasBudget, ~budget, ~nav, _children) => {
               ReactNavigation.Navigation.navigate(nav, ~routeName="/onboarding/accounts", ())
           )>
           <Card>
-            <Card.Content> <Text style=styles##cta value="Start new budget" /> </Card.Content>
+            <Card.Content> <Text style=styles##cta value="Start" /> </Card.Content>
           </Card>
         </TouchableOpacity>
       </View>
