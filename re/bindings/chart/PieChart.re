@@ -10,6 +10,14 @@ let value = (~label=?, value) => {value, label};
 let values = (vals: array(value)) =>
   vals |> Array.map((v) => {"value": v.value, "label": Js.Nullable.from_opt(v.label)});
 
+type animationJs = {
+  .
+  "durationX": int,
+  "durationY": int,
+  "easingX": int,
+  "easingY": int,
+};
+
 type descriptionJs = {
   .
   "text": string, "textSize": Js.Nullable.t(float), "textColor": Js.Nullable.t(string)
@@ -111,7 +119,15 @@ let make =
       "rotationAngle": rotationAngle,
       "drawSliceText": Js.Boolean.to_js_boolean(drawSliceText),
       "usePercentValues": Js.Boolean.to_js_boolean(usePercentValues),
-      "chartDescription": chartDescription
+      "chartDescription": chartDescription,
+      "legend": {"enabled": Js.Boolean.to_js_boolean(false)},
+      "animation": {
+        /* TODO */
+        "durationX": 300,
+        "durationY": 300,
+        "easingX": 50,
+        "easingY": 50
+      }
       /***
          VALUES THAT BREAK IOS
          chartDescription

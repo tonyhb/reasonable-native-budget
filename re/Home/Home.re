@@ -53,7 +53,7 @@ let styles =
       {
         "wrapper": style([backgroundColor("#fff")]),
         "wrapperInner":
-          style([flexDirection(`column), justifyContent(`center), backgroundColor("#fff")]),
+          style([flexGrow(1.), flexDirection(`column), justifyContent(`center), backgroundColor("#fff")]),
         "content": style([padding(15.)]),
         "add":
           style([flexDirection(`column), alignItems(`center), paddingTop(30.), paddingBottom(30.)]),

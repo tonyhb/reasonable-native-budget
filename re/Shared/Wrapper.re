@@ -3,7 +3,7 @@ let styles =
   StyleSheet.create(
     Style.(
       {
-        "wrapper": style([flex(1.)]),
+        "wrapper": style([flex(1.), backgroundColor("#fff")]),
         "nav": style([height(50.), backgroundColor("#F9F9F9"), flexDirection(`row)]),
         "button":
           style([

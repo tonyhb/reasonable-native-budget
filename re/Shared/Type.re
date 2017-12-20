@@ -1,25 +1,25 @@
 open BsReactNative;
 
-module Subheader = {
+module Header = {
   let styles =
     StyleSheet.create(
       Style.(
         {
-          "subheader":
+          "header":
             style([
-              fontFamily("LFTEtica"),
-              fontSize(12.),
-              color("#CCC"),
-              letterSpacing(1.),
-              marginTop(15.),
-              marginBottom(5.)
+              fontFamily("LFTEtica-Bold"),
+              fontSize(18.),
+              color("#79BD8F"),
+              marginTop(30.),
+              marginBottom(20.),
+              textAlign(`center)
             ])
         }
       )
     );
   let c = ReasonReact.statelessComponent("Type.Header");
-  let make = (~value, ~style=?, _children) => {
+  let make = (~value, _children) => {
     ...c,
-    render: (_self) => <Text value=(value |> String.uppercase) style=styles##subheader />
+    render: (_self) => <Text value style=styles##header />
   };
 };
