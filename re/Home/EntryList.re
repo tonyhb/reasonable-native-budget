@@ -17,25 +17,27 @@ let styles =
             marginTop((-1.0))
           ]),
         "left": style([flex(1.), flexDirection(`column), justifyContent(`center)]),
-        "recipient": style([fontFamily("LFTEtica-Bold")]),
-        "category": style([fontFamily("LFTEtica"), fontSize(10.), opacity(0.6)]),
+        "recipient": style([fontFamily("LFTEtica-Bold"), color("#528060")]),
+        "category": style([fontFamily("LFTEtica"), fontSize(12.), opacity(0.6)]),
         "amountWrapper":
           style([flexDirection(`row), flex(1.), justifyContent(`flexEnd), alignItems(`flexStart)]),
-        "amount": style([fontFamily("LFTEtica-Bold"), fontSize(14.), textAlign(`right)]),
+        "amount":
+          style([fontFamily("LFTEtica-Bold"), fontSize(14.), textAlign(`right), color("#528060")]),
         "cent":
           style([
             fontFamily("LFTEtica-Bold"),
-            fontSize(8.),
+            color("#528060"),
+            opacity(0.65),
+            fontSize(9.),
             textAlign(`right),
-            opacity(0.6),
             marginLeft(2.),
             marginTop(1.)
           ]),
         "dateSeparator":
           style([
             fontFamily("LFTEtica"),
+            color("#A1A6A6"),
             fontSize(10.),
-            opacity(0.6),
             marginTop(8.),
             marginBottom(5.)
           ])
@@ -104,7 +106,7 @@ let make = (~entries, _children) => {
                currentEntry := entry;
                <View key=entry.id>
                  <Text
-                   value=(DateFormat.dayMonth(entry.date |> Js.Date.fromFloat))
+                   value=(DateFormat.dayMonth(entry.date |> Js.Date.fromFloat) |> String.uppercase)
                    style=styles##dateSeparator
                  />
                  view

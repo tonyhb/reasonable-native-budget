@@ -22,13 +22,15 @@ let styles =
 
 module NavButton = {
   let c = ReasonReact.statelessComponent("Wrapper.NavButton");
-  let make = (~text, ~isActive=false, _children) => {
+  let make = (~text, ~isActive=false, ~onPress, _children) => {
     ...c,
     render: (_self) =>
+      <TouchableOpacity onPress=onPress style=styles##wrapper>
       <View style=styles##button>
         <View style=styles##buttonImage />
         <Text style=styles##buttonText value=(text |> String.uppercase) />
       </View>
+      </TouchableOpacity>
   };
 };
 
@@ -40,10 +42,9 @@ let make = (~nav, children) => {
     <View style=styles##wrapper>
       <View style=styles##wrapper> (children |> ReasonReact.arrayToElement) </View>
       <View style=styles##nav>
-        <NavButton text="Entries" />
-        <NavButton text="Accounts" />
-        <NavButton text="Budget" />
-        <NavButton text="Reports" />
+        <NavButton text="Budget" onPress=(() => ReactNavigation.Navigation.navigate(nav, ~routeName="/budget", ())) />
+        <NavButton text="Accounts" onPress=(() => ()) />
+        <NavButton text="Subscriptions" onPress=(() => ()) />
       </View>
     </View>
 };

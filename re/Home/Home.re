@@ -51,9 +51,9 @@ let styles =
   StyleSheet.create(
     Style.(
       {
-        "wrapper": style([backgroundColor("#79BD8F")]),
+        "wrapper": style([backgroundColor("#fff")]),
         "wrapperInner":
-          style([flexDirection(`column), justifyContent(`center), backgroundColor("#79BD8F")]),
+          style([flexDirection(`column), justifyContent(`center), backgroundColor("#fff")]),
         "content": style([padding(15.)]),
         "add":
           style([flexDirection(`column), alignItems(`center), paddingTop(30.), paddingBottom(30.)]),
@@ -82,7 +82,6 @@ let make = (~budget: Budget.t, ~nav, _children) => {
       </View>
       <View style=Style.(style([backgroundColor("#fff"), flex(1.), padding(15.)]))>
         /* TODO: Zero entry, blank slate */
-        <Type.Subheader value="Latest entries " /> 
         <EntryList entries=(budget.entries |> Entry.take(10)) />
       </View>
     </ScrollView>

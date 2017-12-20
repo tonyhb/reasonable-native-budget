@@ -3,6 +3,7 @@ type t = {
   budget: array(Group.t),
   accounts: array(Account.t),
   recipients: list(Recipient.t),
+  /* TODO: Store this in a tree of YYYY-MM nodes */
   entries: list(Entry.t)
 };
 

@@ -16,7 +16,7 @@ let budget = (nav, screenProps) => {
 };
 
 let home = (nav: ReactNavigation.Navigation.t(navParams), screenProps: screenProps) =>
-    <Welcome key="welcome" budget=screenProps.budget hasBudget=screenProps.hasBudget nav />;
+  <Welcome key="welcome" budget=screenProps.budget hasBudget=screenProps.hasBudget nav />;
 
 let navOptions = StackNavigatorRe.navigationOptions(~header=`notVisible, ());
 
@@ -58,6 +58,7 @@ let routes: StackNavigatorRe.routes(screenProps, navParams) =
           ()
         )
       ),
+      /** App **/
       (
         "/entries/new",
         route(
@@ -69,6 +70,16 @@ let routes: StackNavigatorRe.routes(screenProps, navParams) =
                 nav=navigation
               />,
           ~path="/entries/new",
+          ~navigationOptions=`static(navOptions),
+          ()
+        )
+      ),
+      (
+        "/budget",
+        route(
+          ~screen=
+            ({navigation, screenProps}) => <BudgetView budget=screenProps.budget nav=navigation />,
+          ~path="/budget",
           ~navigationOptions=`static(navOptions),
           ()
         )
