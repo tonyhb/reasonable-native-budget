@@ -56,3 +56,6 @@ buck-out/
 lib/
 .bsb.lock
 .merlin
+
+# personal
+ios/pods
