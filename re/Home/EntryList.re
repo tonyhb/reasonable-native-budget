@@ -14,7 +14,7 @@ let styles =
             paddingRight(15.),
             alignItems(`center),
             backgroundColor("#fff"),
-            marginTop(-1.0)
+            marginTop((-1.0))
           ]),
         "left": style([flex(1.), flexDirection(`column), justifyContent(`center)]),
         "recipient": style([fontFamily("LFTEtica-Bold")]),
@@ -86,34 +86,37 @@ module ExpenseItem = {
 let c = ReasonReact.statelessComponent("EntryList");
 
 let make = (~entries, _children) => {
-  let list = {
-    let currentEntry = ref(entries |> List.hd);
-    entries
-    |> List.mapi(
-         (i, entry: Entry.t) => {
-           let view =
-             switch entry.entryType {
-             | Expense(e) => <ExpenseItem entry expense=e key=entry.id />
-             | Income(_i) => ReasonReact.nullElement
-             | Transfer(_t) => ReasonReact.nullElement
-             };
-           if (i == 0 || DateFormat.isDifferentDay(entry.date, currentEntry^.Entry.date)) {
-             currentEntry := entry;
-             <View key=entry.id>
-               <Text
-                 value=(DateFormat.dayMonth(entry.date |> Js.Date.fromFloat))
-                 style=styles##dateSeparator
-               />
+  let list =
+    switch entries {
+    | [] => <Text value="No entries" />
+    | _ =>
+      let currentEntry = ref(entries |> List.hd);
+      entries
+      |> List.mapi(
+           (i, entry: Entry.t) => {
+             let view =
+               switch entry.entryType {
+               | Expense(e) => <ExpenseItem entry expense=e key=entry.id />
+               | Income(_i) => ReasonReact.nullElement
+               | Transfer(_t) => ReasonReact.nullElement
+               };
+             if (i == 0 || DateFormat.isDifferentDay(entry.date, currentEntry^.Entry.date)) {
+               currentEntry := entry;
+               <View key=entry.id>
+                 <Text
+                   value=(DateFormat.dayMonth(entry.date |> Js.Date.fromFloat))
+                   style=styles##dateSeparator
+                 />
+                 view
+               </View>
+             } else {
+               currentEntry := entry;
                view
-             </View>
-           } else {
-             currentEntry := entry;
-             view
+             }
            }
-         }
-       )
-    |> Array.of_list
-    |> ReasonReact.arrayToElement
-  };
+         )
+      |> Array.of_list
+      |> ReasonReact.arrayToElement
+    };
   {...c, render: (_self) => <View style=styles##wrapper> list </View>}
 };
