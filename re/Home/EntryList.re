@@ -38,8 +38,9 @@ let styles =
             fontFamily("LFTEtica"),
             color("#A1A6A6"),
             fontSize(10.),
-            marginTop(8.),
-            marginBottom(5.)
+            marginTop(15.),
+            marginBottom(5.),
+            letterSpacing(1.)
           ])
       }
     )
