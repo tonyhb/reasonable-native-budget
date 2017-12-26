@@ -17,7 +17,7 @@ let styles =
             marginTop((-1.0))
           ]),
         "left": style([flex(1.), flexDirection(`column), justifyContent(`center)]),
-        "recipient": style([fontFamily("LFTEtica-Bold"), color("#528060")]),
+        "recipient": style([fontFamily("LFTEtica-Bold"), color("#3D4840")]),
         "category": style([fontFamily("LFTEtica"), fontSize(12.), opacity(0.6)]),
         "amountWrapper":
           style([flexDirection(`row), flex(1.), justifyContent(`flexEnd), alignItems(`flexStart)]),
@@ -41,10 +41,52 @@ let styles =
             marginTop(15.),
             marginBottom(5.),
             letterSpacing(1.)
-          ])
+          ]),
+        "debit": style([color("#C92A01")]),
+        "credit": style([color("#528060")])
       }
     )
   );
+
+module IncomeItem = {
+  let c = ReasonReact.statelessComponent("EntryList.DisplayItem");
+  let make = (~entry: Entry.t, ~income: Income.t, _children) => {
+    let centAmount = Printf.sprintf("%.0f", mod_float(entry.amount, 1.) *. 100.);
+    {
+      ...c,
+      render: (_self) =>
+        <View style=styles##itemWrapper>
+          <View style=styles##left>
+            <Text
+              value=(
+                switch income.payee {
+                | Some(r) => r.name
+                | None => "-"
+                }
+              )
+              style=styles##recipient
+            />
+            <Text
+              value=(
+                switch entry.category {
+                | Some(c) => c.name
+                | None => "(uncategorized)"
+                }
+              )
+              style=styles##category
+            />
+          </View>
+          <View style=styles##amountWrapper>
+            <Text
+              value=("$" ++ Printf.sprintf("%.0f", floor(entry.amount)))
+              style=styles##amount
+            />
+            <Text value=(centAmount == "0" ? "00" : centAmount) style=styles##cent />
+          </View>
+        </View>
+    }
+  };
+};
 
 module ExpenseItem = {
   let c = ReasonReact.statelessComponent("EntryList.DisplayItem");
@@ -77,9 +119,12 @@ module ExpenseItem = {
           <View style=styles##amountWrapper>
             <Text
               value=("$" ++ Printf.sprintf("%.0f", floor(entry.amount)))
-              style=styles##amount
+              style=(StyleSheet.flatten([styles##amount, styles##debit]))
             />
-            <Text value=(centAmount == "0" ? "00" : centAmount) style=styles##cent />
+            <Text
+              value=(centAmount == "0" ? "00" : centAmount)
+              style=(StyleSheet.flatten([styles##cent, styles##debit]))
+            />
           </View>
         </View>
     }
@@ -100,7 +145,7 @@ let make = (~entries, _children) => {
              let view =
                switch entry.entryType {
                | Expense(e) => <ExpenseItem entry expense=e key=entry.id />
-               | Income(_i) => ReasonReact.nullElement
+               | Income(i) => <IncomeItem entry income=i key=entry.id />
                | Transfer(_t) => ReasonReact.nullElement
                };
              if (i == 0 || DateFormat.isDifferentDay(entry.date, currentEntry^.Entry.date)) {

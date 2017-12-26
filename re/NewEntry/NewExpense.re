@@ -14,7 +14,7 @@ let updateRecipient = (recip) => UpdateRecipient(recip);
 
 let updateDate = (date: Js.Date.t) => UpdateDate(date |> Js.Date.valueOf);
 
-let c = ReasonReact.reducerComponent("NewEntry");
+let c = ReasonReact.reducerComponent("NewExpense");
 
 module RecipientAutocomplete =
   Form.AutocompleteMaker(
@@ -23,11 +23,11 @@ module RecipientAutocomplete =
     }
   );
 
-let recipientList = (recipients) => 
+let recipientList = (recipients) =>
   recipients
   |> List.map(fun (r) => ({textValue: r.name, item: r}: RecipientAutocomplete.autocompleteItem));
 
-let make = (~budget, ~updateBudget, ~nav, _children) => {
+let make = (~budget: Budget.t, ~updateBudget, ~nav, _children) => {
   ...c,
   initialState: () => {entry: Budget.entry(budget)},
   reducer: (action, state) =>
@@ -48,7 +48,7 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
       })
     },
   render: (self) =>
-    <View style=Style.(style([paddingTop(30.), padding(15.)]))>
+    <View style=Style.(style([paddingTop(30.), padding(15.), backgroundColor("#fff")]))>
       <Form.Field>
         <Form.Label value="Amount" textAlign=`center />
         <Form.MoneyInput
@@ -56,7 +56,7 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
           value=("$" ++ Printf.sprintf("%.2f", self.state.entry.amount))
           selectTextOnFocus=true
           autoFocus=true
-          style=Style.(style([fontFamily("LFTEticaDisplayHv"), fontSize(30.), textAlign(`center)]))
+          style=Style.(style([fontFamily("LFTEticaDisplayHv"), fontSize(30.), textAlign(`center), color("#C92A01")]))
         />
       </Form.Field>
       <View style=Style.(style([flexDirection(`row)]))>
@@ -94,7 +94,12 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
                   /* This may have been caused by a backspace in autocomplete, which means an item wouldn't
                      match despite existing.  newRecipientByName attempts to use an existing recipient if
                      possible */
-                  | _ => self.reduce(() => UpdateRecipient(text |> Recipient.newRecipientByName(budget.recipients)), ())
+                  | _ =>
+                    self.reduce(
+                      () =>
+                        UpdateRecipient(text |> Recipient.newRecipientByName(budget.recipients)),
+                      ()
+                    )
                   }
               )
             />
@@ -126,13 +131,12 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
               )
               onValueChange=((cat) => self.reduce(() => UpdateCategory(cat), ()))
               values=(
-                Group.categories(budget.Budget.budget)
-                |> Array.map(
+                budget.categories
+                |> List.map(
                      fun (cat) => (
                        {text: cat.Category.name, item: cat}: Form.ModalPicker.value(Category.t)
                      )
                    )
-                |> Array.to_list
               )
             />
           </Form.Field>

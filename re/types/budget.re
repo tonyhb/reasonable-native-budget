@@ -57,10 +57,27 @@ let addExpense = (t: t, entry: Entry.t, expense: Expense.t) => {
   }
 };
 
+let addIncome = (t: t, entry: Entry.t, income: Income.t) => {
+  /* Ensure we add the payee */
+  let (newBudget, payee) = addRecipient(t, income.payee);
+  /* The recipient may have a new ID, so recreate the entry with the new expense */
+  let entry = {...entry, entryType: Entry.Income({payee: payee})};
+  {
+    ...newBudget,
+    accounts:
+      newBudget.accounts
+      |> Array.to_list
+      |> Account.addBalanceToList(entry.Entry.source.id, entry.amount)
+      |> Array.of_list,
+    entries: [entry, ...t.entries]
+  };
+};
+
 let addEntry = (t: t, entry: Entry.t) : t => {
   let budget =
     switch entry.entryType {
     | Entry.Expense(e) => addExpense(t, entry, e)
+    | Entry.Income(i) => addIncome(t, entry, i)
     | _ => t
     };
   {

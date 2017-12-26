@@ -26,6 +26,20 @@ type t = {
   entryType
 };
 
+let entry = (~amount, ~date, ~source, ~category, ~currency, ~description, ~entry): t => {
+  id: Uuid.gen(),
+  date,
+  source,
+  category,
+  amount,
+  currency,
+  description,
+  cleared: false,
+  createdAt: Js.Date.now(),
+  updatedAt: Js.Date.now(),
+  entryType: entry
+};
+
 let rec _take = (~l: list(t), ~ret: list(t)=[], ~amount: int) : list(t) =>
   switch amount {
   | 0 => ret
@@ -63,7 +77,6 @@ module JSON = {
         ("createdAt", json_of_date(data.date)),
         ("updatedAt", json_of_date(data.date)),
         ("entryType", data.entryType |> string_of_entryType |> string),
-        /** TODO: Move entry types into their own files, write JSON encodes/decoders for them and add a switch here invoking the correct encoding */
         (
           "entryData",
           switch data.entryType {

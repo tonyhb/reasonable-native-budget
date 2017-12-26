@@ -5,7 +5,7 @@ let styles =
     Style.(
       {
         "wrapper": style([flexDirection(`row), backgroundColor("#72B387"), height(40.)]),
-        "tab": style([flex(1.), backgroundColor("#79BD8F"), height(40.), paddingTop(13.)]),
+        "tab": style([flex(1.), backgroundColor("#72B387"), height(40.), paddingTop(13.)]),
         "activeTab": style([borderBottomWidth(6.), height(34.), borderBottomColor("#ffffffcc")]),
         "tabText":
           style([
@@ -23,7 +23,7 @@ let styles =
 
 module Tab = {
   let c = ReasonReact.statelessComponent("Tabs.Tab");
-  let make = (~value, ~onPress, ~isActive, _children) => {
+  let make = (~value, ~onPress, ~isActive=false, _children) => {
     ...c,
     render: (_self) =>
       <TouchableOpacity onPress style=Style.(style([flex(1.)]))>

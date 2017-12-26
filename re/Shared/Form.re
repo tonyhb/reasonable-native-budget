@@ -180,10 +180,10 @@ module MoneyInput = {
       (~style=?, ~value, ~onChangeFloat, ~selectTextOnFocus=true, ~autoFocus=false, _children) => {
     let handleBlur = (_evt, self) => {
       let regex = [%bs.re "/[^0-9.]/g"];
-      self.ReasonReact.state
-      |> Js.String.replaceByRe(regex, "")
-      |> float_of_string
-      |> onChangeFloat
+      switch (self.ReasonReact.state |> Js.String.replaceByRe(regex, "") |> float_of_string) {
+      | exception _e => onChangeFloat(0.)
+      | f => onChangeFloat(f)
+      }
     };
     {
       ...c,
@@ -445,7 +445,9 @@ module AutocompleteMaker = (Res: Autocompleter) => {
                 autocomplete
                 |> List.find(
                      (item: autocompleteItem) =>
-                       item.textValue |> Js.String.toLowerCase |> Js.String.indexOf(newValue |> Js.String.toLowerCase) == 0
+                       item.textValue
+                       |> Js.String.toLowerCase
+                       |> Js.String.indexOf(newValue |> Js.String.toLowerCase) == 0
                    )
               ) {
               | item => {value: newValue, autocomplete: Some(item)}
