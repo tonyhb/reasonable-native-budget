@@ -31,7 +31,7 @@ let make = (~hasBudget, ~budget, ~nav, _children) => {
   ...c,
   render: (_self) =>
     hasBudget ?
-      <Wrapper nav> <Home budget nav key="home" /> </Wrapper> :
+      <Wrapper showTopBar=false nav> <Home budget nav key="home" /> </Wrapper> :
       <View style=styles##wrapper>
         <Text style=styles##title value="App Name" />
         <TouchableOpacity

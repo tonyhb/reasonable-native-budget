@@ -9,6 +9,7 @@ let styles =
   StyleSheet.create(
     Style.(
       {
+        "introChartWrapper": style([height(70.), marginTop(40.)]),
         "introChart": style([height(70.)]),
         "totals": style([marginTop(15.), flexDirection(`column)]),
         "row": style([marginTop(5.), flexDirection(`row), justifyContent(`center)]),
@@ -24,14 +25,13 @@ let c = ReasonReact.statelessComponent("Budget");
 let make = (~budget: Budget.t, ~nav, _children) => {
   ...c,
   render: (_self) =>
-    <Wrapper nav>
+    <Wrapper value="Your Budget" nav>
       <View key="budget" style=Style.(style([flex(1.)]))>
         <Tabs>
           <Tabs.Tab key="view" value="View" onPress=(() => ()) isActive=true />
           <Tabs.Tab key="edit" value="Edit" onPress=(() => ()) isActive=false />
         </Tabs>
-        <Type.Header value="Your Budget" />
-        <View style=styles##introChart>
+        <View style=styles##introChartWrapper>
           <PieChart
             data=[|PieChart.value(45.), {value: 150., label: None}|]
             config=(

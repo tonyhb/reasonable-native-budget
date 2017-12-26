@@ -4,8 +4,8 @@ let styles =
   StyleSheet.create(
     Style.(
       {
-        "wrapper": style([flexDirection(`row), backgroundColor("#72B387"), height(40.)]),
-        "tab": style([flex(1.), backgroundColor("#72B387"), height(40.), paddingTop(13.)]),
+        "wrapper": style([flexDirection(`row), backgroundColor("#79BD8F"), height(40.)]),
+        "tab": style([flex(1.), backgroundColor("#79BD8F"), height(40.), paddingTop(13.)]),
         "activeTab": style([borderBottomWidth(6.), height(34.), borderBottomColor("#ffffffcc")]),
         "tabText":
           style([
