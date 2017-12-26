@@ -1,7 +1,7 @@
 type t = {
   settings: Settings.t,
-  budget: array(Group.t),
   accounts: array(Account.t),
+  categories: list(Category.t),
   recipients: list(Recipient.t),
   entries: list(Entry.t)
 };
@@ -20,6 +20,6 @@ module JSON: {
 };
 
 module Examples: {
-  let basic: array(Group.t);
+  let basic: list(Category.t);
   let standard: array(Group.t);
 }

@@ -1,19 +1,27 @@
 open BsReactNative;
 
-let styles = StyleSheet.create(
-  Style.({
-    "introChart": style([ height(70.)]),
-    "totals": style([ marginTop(15.), flexDirection(`column) ]),
-    "row": style([ marginTop(5.), flexDirection(`row), justifyContent(`center) ]),
+module CategoryItem = {
+  let c = ReasonReact.statelessComponent("BudgetView.CategoryItem");
+  let make = (~category, _children) => {...c, render: (_self) => <View />};
+};
 
-    "spent": style([ fontFamily("LFTEtica"), color("#528060") ]),
-    "bold": style([ fontFamily("LFTEtica-Bold"), color("#528060") ]),
-    "small": style([ opacity(0.9), fontSize(11.) ])
-  })
-);
+let styles =
+  StyleSheet.create(
+    Style.(
+      {
+        "introChart": style([height(70.)]),
+        "totals": style([marginTop(15.), flexDirection(`column)]),
+        "row": style([marginTop(5.), flexDirection(`row), justifyContent(`center)]),
+        "spent": style([fontFamily("LFTEtica"), color("#528060")]),
+        "bold": style([fontFamily("LFTEtica-Bold"), color("#528060")]),
+        "small": style([opacity(0.9), fontSize(11.)])
+      }
+    )
+  );
 
 let c = ReasonReact.statelessComponent("Budget");
-let make = (~budget, ~nav, _children) => {
+
+let make = (~budget: Budget.t, ~nav, _children) => {
   ...c,
   render: (_self) =>
     <Wrapper nav>
@@ -22,9 +30,7 @@ let make = (~budget, ~nav, _children) => {
           <Tabs.Tab key="view" value="View" onPress=(() => ()) isActive=true />
           <Tabs.Tab key="edit" value="Edit" onPress=(() => ()) isActive=false />
         </Tabs>
-
         <Type.Header value="Your Budget" />
-
         <View style=styles##introChart>
           <PieChart
             data=[|PieChart.value(45.), {value: 150., label: None}|]
@@ -37,13 +43,11 @@ let make = (~budget, ~nav, _children) => {
             transparentCircleRadius=64
           />
         </View>
-
         <View style=styles##totals>
           <View style=styles##row>
             <Text style=styles##bold value="$3,211" />
             <Text style=styles##spent value=" of $6,500 spent this month" />
           </View>
-
           <View style=styles##row>
             <Text style=styles##small>
               <Text style=styles##bold value="$9,123" />
@@ -51,8 +55,13 @@ let make = (~budget, ~nav, _children) => {
             </Text>
           </View>
         </View>
-
         <SectionHeader value="Categories" />
+        (
+          budget.categories
+          |> List.map((c: Category.t) => <CategoryItem category=c key=c.id />)
+          |> Array.of_list
+          |> ReasonReact.arrayToElement
+        )
 
       </View>
     </Wrapper>

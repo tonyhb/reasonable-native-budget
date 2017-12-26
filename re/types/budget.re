@@ -1,7 +1,7 @@
 type t = {
   settings: Settings.t,
-  budget: array(Group.t),
   accounts: array(Account.t),
+  categories: list(Category.t),
   recipients: list(Recipient.t),
   /* TODO: Store this in a tree of YYYY-MM nodes */
   entries: list(Entry.t)
@@ -9,7 +9,7 @@ type t = {
 
 let blankBudget = () => {
   settings: {defaultCurrency: Currency.defaultCurrencyType},
-  budget: [||],
+  categories: [],
   accounts: [||],
   recipients: [],
   entries: []
@@ -76,7 +76,7 @@ module JSON = {
     Json.Encode.(
       object_([
         ("settings", Settings.JSON.marshal(data.settings)),
-        ("budget", arrayOf(Group.JSON.marshal, data.budget)),
+        ("categories", Json.Encode.list(Category.JSON.marshal, data.categories)),
         ("accounts", arrayOf(Account.JSON.marshal, data.accounts)),
         ("recipients", Json.Encode.list(Recipient.JSON.marshal, data.recipients)),
         ("entries", Json.Encode.list(Entry.JSON.marshal, data.entries))
@@ -86,10 +86,10 @@ module JSON = {
     open Json.Decode;
     let accounts = json |> field("accounts", array(Account.JSON.unmarshal));
     let recipients = json |> field("recipients", list(Recipient.JSON.unmarshal));
-    let budget = json |> field("budget", array(Group.JSON.unmarshal));
+    let categories = json |> field("categories", list(Category.JSON.unmarshal));
     {
       settings: json |> field("settings", Settings.JSON.unmarshal),
-      budget,
+      categories,
       accounts,
       recipients,
       entries:
@@ -97,11 +97,7 @@ module JSON = {
         |> field(
              "entries",
              list(
-               Entry.JSON.unmarshal(
-                 ~accounts=accounts |> Array.to_list,
-                 ~recipients,
-                 ~categories=Group.categories(budget) |> Array.to_list
-               )
+               Entry.JSON.unmarshal(~accounts=accounts |> Array.to_list, ~recipients, ~categories)
              )
            )
     }
@@ -109,22 +105,17 @@ module JSON = {
 };
 
 module Examples = {
-  let basic: array(Group.t) = [|
-    Group.group(
-      ~name="Expenses",
-      ~data=[|
-        Category.category(~name="Housing", ()),
-        Category.category(~name="Bills & Utilities", ()),
-        Category.category(~name="Food", ()),
-        Category.category(~name="Family", ()),
-        Category.category(~name="Health", ()),
-        Category.category(~name="Debt", ()),
-        Category.category(~name="Travel", ()),
-        Category.category(~name="Spending money", ()),
-        Category.category(~name="Rainy day & savings", ())
-      |]
-    )
-  |];
+  let basic: list(Category.t) = [
+    Category.category(~name="Housing", ()),
+    Category.category(~name="Bills & Utilities", ()),
+    Category.category(~name="Food", ()),
+    Category.category(~name="Family", ()),
+    Category.category(~name="Health", ()),
+    Category.category(~name="Debt", ()),
+    Category.category(~name="Travel", ()),
+    Category.category(~name="Spending money", ()),
+    Category.category(~name="Rainy day & savings", ())
+  ];
   let standard: array(Group.t) = [|
     Group.group(
       ~name="Monthly expenses",

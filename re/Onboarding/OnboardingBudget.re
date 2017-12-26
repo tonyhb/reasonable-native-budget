@@ -1,12 +1,5 @@
 open BsReactNative;
 
-open SectionList;
-
-let defaultStandardBudget =
-  Budget.Examples.basic
-  |> Array.map((group) => SectionList.section(~data=group.Group.data, ~key=group.Group.name, ()))
-  |> SectionList.sections;
-
 module GroupHeader = {
   let c = ReasonReact.statelessComponent("Onboarding.GroupHeader");
   let make = (~value, _children) => {...c, render: (_self) => <Text value />};
@@ -73,11 +66,10 @@ module BudgetCategory = {
   };
 };
 
-type state = {budget: array(Group.t)};
+type state = {categories: list(Category.t)};
 
 type actions =
-  | ResetBudget(array(Group.t))
-  | UpdateGroup(Group.t)
+  | ResetBudget(list(Category.t))
   | UpdateCategory(Category.t)
   | RemoveCategory(Category.t);
 
@@ -103,30 +95,20 @@ let styles =
 let c = ReasonReact.reducerComponent("Onboarding.BudgetWrapper");
 
 let make = (~budget, ~updateBudget, ~nav, _children) => {
-  let sectionsOfBudget = (budget) =>
-    budget
-    |> Array.map(
-         (group) => SectionList.section(~data=group.Group.data, ~key=group.Group.name, ())
-       )
-    |> SectionList.sections;
   {
     ...c,
-    initialState: () => {budget: Budget.Examples.basic},
+    initialState: () => {categories: Budget.Examples.basic},
     reducer: (action, state) =>
       switch action {
-      | UpdateGroup(group) =>
-        ReasonReact.Update({
-          budget: state.budget |> Array.map((item) => item.Group.id == group.id ? group : item)
-        })
       | UpdateCategory(cat) =>
         ReasonReact.Update({
-          budget: state.budget |> Array.map((group) => Group.updateCategoryInGroup(group, cat))
+          categories: state.categories |> List.map((c: Category.t) => c.id == cat.id ? cat : c)
         })
       | RemoveCategory(cat) =>
         ReasonReact.Update({
-          budget: state.budget |> Array.map((group) => Group.removeCategoryFromGroup(group, cat))
+          categories: state.categories |> List.filter((c: Category.t) => c.id !== cat.id)
         })
-      | ResetBudget(budget) => ReasonReact.Update({budget: budget})
+      | ResetBudget(categories) => ReasonReact.Update({categories: categories})
       },
     render: (self) =>
       <OnboardingCommon.Wrapper>
@@ -137,29 +119,23 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
         <View style=styles##content>
           <Card>
             <View style=Style.(style([paddingTop(15.), paddingBottom(10.)]))>
-              <SectionList
-                sections=(self.state.budget |> sectionsOfBudget)
-                renderItem=(
-                  renderItem(
-                    (data) =>
+              <ScrollView>
+              (self.state.categories |> List.map((c: Category.t) =>
                       <BudgetCategory
-                        onChange=((item) => self.reduce((_evt) => UpdateCategory(item)))
-                        onRemove=(self.reduce((_evt) => RemoveCategory(data.item)))
-                        category=data.item
+                        onChange=((c) => self.reduce((_evt) => UpdateCategory(c)))
+                        onRemove=(self.reduce((_evt) => RemoveCategory(c)))
+                        category=c
                       />
-                  )
-                )
-                renderSectionFooter=((_sec) => <GroupFooter />)
-                keyExtractor=((cat, _index) => cat.name)
-                stickySectionHeadersEnabled=true
-              />
+                ) |> Array.of_list |> ReasonReact.arrayToElement
+              )
+              </ScrollView>
             </View>
           </Card>
           <Text
             style=styles##total
             value=(
               "BUDGETED  TOTAL, MONTHLY: $"
-              ++ Printf.sprintf("%.2f", Group.total(self.state.budget))
+              ++ Printf.sprintf("%.2f", (self.state.categories |> List.fold_left((total, c) => total +. c.Category.amount, 0.0)))
             )
           />
           <View style=Style.(style([flexDirection(`row), justifyContent(`center)]))>
@@ -169,7 +145,7 @@ let make = (~budget, ~updateBudget, ~nav, _children) => {
               onPress=(
                 self.handle(
                   (_t, self) => {
-                    let newBudget: Budget.t = {...budget, budget: self.state.budget};
+                    let newBudget: Budget.t = {...budget, categories: self.state.categories};
                     updateBudget(
                       ~budget=newBudget,
                       ~sideEffect=
