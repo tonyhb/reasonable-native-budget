@@ -26,7 +26,7 @@ type t = {
   entryType
 };
 
-let entry = (~amount, ~date, ~source, ~category, ~currency, ~description, ~entry): t => {
+let entry = (~amount, ~date, ~source, ~category, ~currency, ~description, ~entry) : t => {
   id: Uuid.gen(),
   date,
   source,
@@ -40,17 +40,50 @@ let entry = (~amount, ~date, ~source, ~category, ~currency, ~description, ~entry
   entryType: entry
 };
 
-let rec _take = (~l: list(t), ~ret: list(t)=[], ~amount: int) : list(t) =>
+let rec _takeItems = (~l: list(t), ~ret: list(t)=[], ~amount: int) : list(t) =>
   switch amount {
   | 0 => ret
   | _ =>
     switch l {
     | [] => ret
-    | [head, ...rest] => _take(~l=rest, ~ret=[head, ...ret], ~amount=amount - 1)
+    | [head, ...rest] => _takeItems(~l=rest, ~ret=[head, ...ret], ~amount=amount - 1)
     }
   };
 
-let take = (amount: int, l: list(t)) : list(t) => _take(~l, ~ret=[], ~amount) |> List.rev;
+let takeItems = (amount: int, l: list(t)) : list(t) =>
+  _takeItems(~l, ~ret=[], ~amount) |> List.rev;
+
+let rec _takeMonth =
+        (~l: list(t), ~startOfMonth: float, ~endOfMonth: float, ~ret: list(t))
+        : list(t) =>
+  switch l {
+  | [] => ret
+  | [head, ...rest] =>
+    /**
+        Assume that the list is already sorted in reverse-chronological order
+        from newest to oldest entry.  If the item is before the month, we can skip.
+        ourselves and run our own find_all function, breaking early once we traverse
+        past the requested month.
+       **/
+    (
+      if (head.date < startOfMonth) {
+        _takeMonth(~l, ~startOfMonth, ~endOfMonth, ~ret)
+      } else if (head.date > endOfMonth) {
+        ret
+      } else {
+        /** This must be within the month range; add it to ~ret and recurse **/
+        _takeMonth(~l=rest, ~startOfMonth, ~endOfMonth, ~ret=[head, ...ret])
+      }
+    )
+  };
+
+/** takeMonth returns a new sublist containing entries for the given month. **/
+let takeMonth = (month: Date.month, l: list(t)) : list(t) => {
+  let startOfMonth = Date.dateOfMonth(month) |> Js.Date.valueOf;
+  let (y, m) = month;
+  let endOfMonth = Date.dateOfMonth((y, m +. 1.0)) |> Js.Date.valueOf;
+  _takeMonth(~l, ~startOfMonth, ~endOfMonth, ~ret=[])
+};
 
 module JSON = {
   let json_of_date = (d: float) : Js.Json.t =>
