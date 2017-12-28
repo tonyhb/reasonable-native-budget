@@ -4,6 +4,7 @@ type t = {
   amount: float,
   hint: option(string)
 };
+
 let category = (~name, ~hint=?, ~amount=?, ()) => {
   id: Uuid.gen(),
   name,
@@ -14,6 +15,7 @@ let category = (~name, ~hint=?, ~amount=?, ()) => {
     },
   hint
 };
+
 module JSON = {
   let marshal = (cat: t) =>
     Json.Encode.(

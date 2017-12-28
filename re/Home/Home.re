@@ -82,7 +82,7 @@ let make = (~budget: Budget.t, ~nav, _children) => {
       </View>
       <View style=Style.(style([backgroundColor("#fff"), flex(1.), padding(15.)]))>
         /* TODO: Zero entry, blank slate */
-        <EntryList entries=(budget.entries |> Entry.take(10)) />
+        <EntryList entries=(budget.entries |> Entry.takeItems(10)) />
       </View>
     </ScrollView>
 };

@@ -13,6 +13,7 @@ module TopBar = {
               Platform.os == Platform.IOS ? height(60.) : height(45.)
             ]),
           "back": style([margin(15.), width(22.), height(22.)]),
+          "settings": style([margin(13.), width(22.), height(22.)]),
           "spacer": style([width(22.)]),
           "text":
             style([
@@ -46,7 +47,7 @@ module TopBar = {
           }
         )
         <TouchableOpacity
-          style=styles##back
+          style=styles##settings
           onPress=((_evt) => ReactNavigation.Navigation.navigate(nav, ~routeName="/settings", ()))>
           <Image source=(Image.Required(Packager.require("../../../../data/img/settings.png"))) />
         </TouchableOpacity>

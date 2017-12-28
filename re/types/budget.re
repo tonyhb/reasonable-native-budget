@@ -3,7 +3,7 @@ type t = {
   accounts: array(Account.t),
   categories: list(Category.t),
   recipients: list(Recipient.t),
-  /* TODO: Store this in a tree of YYYY-MM nodes */
+  /* TODO: Store this in a tree of YYYY-MM nodes? Or a tree of categories? */
   entries: list(Entry.t)
 };
 
