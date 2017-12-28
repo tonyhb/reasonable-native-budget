@@ -152,7 +152,7 @@ let rec _byCategory =
 /** byCategory takes a list of entries and returns Js.Object.t keyed by category
   ID each pointing to a list of entries for that category **/
 /** TODO: Reverse each category's list? **/
-let byCategory = (l: list(t)) => _byCategory(~l, ~ret=[]);
+let byCategory = (l: list(t)) => _byCategory(~l, ~ret=[]) |> List.rev;
 
 module JSON = {
   let json_of_date = (d: float) : Js.Json.t =>
