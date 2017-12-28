@@ -35,13 +35,13 @@ module CategoryItem = {
     );
   let c = ReasonReact.statelessComponent("BudgetView.CategoryItem");
   let make =
-      (~name: string, ~summary: Entry.entriesByCategory, ~budget: Budget.t, _children) => {
+      (~name: string, ~summary: Entry.entriesByCategory, _children) => {
     ...c,
     render: (_self) =>
       <View style=catStyles##wrapper>
         <Text value=name style=catStyles##name />
         <View style=styles##row>
-          <Text value=(Printf.sprintf("$%.0f", summary.total)) style=styles##bold />
+          <Text value=(Printf.sprintf("$%.2f", summary.total)) style=styles##bold />
           <Text value=" spent this month" style=styles##spent />
         </View>
       </View>
@@ -113,7 +113,7 @@ let make = (~budget: Budget.t, ~nav, _children) => {
             expenditure and if so render a category block for these
            **/
           (switch ((mc |> List.hd).id) {
-            | None => <CategoryItem name="Uncategorized items" summary=(mc |> List.hd) budget />
+            | None => <CategoryItem name="Uncategorized items" summary=(mc |> List.hd) />
             | _ => ReasonReact.nullElement
           })
 
@@ -127,7 +127,7 @@ let make = (~budget: Budget.t, ~nav, _children) => {
                      | exception Not_found => {id: Some(c.id), entries: [], total: 0.}
                      | c => c
                      };
-                   <CategoryItem name=c.name key=c.id summary budget />
+                   <CategoryItem name=c.name key=c.id summary />
                  }
                )
             |> Array.of_list

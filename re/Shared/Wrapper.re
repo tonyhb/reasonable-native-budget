@@ -18,7 +18,7 @@ module TopBar = {
           "text":
             style([
               flex(1.),
-              fontFamily("LFTEtica-Bold"),
+              fontFamily("LFTEtica"),
               color("#FFF"),
               fontSize(16.),
               textAlign(`center),
