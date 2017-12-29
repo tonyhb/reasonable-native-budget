@@ -70,7 +70,7 @@ let addIncome = (t: t, entry: Entry.t, income: Income.t) => {
       |> Account.addBalanceToList(entry.Entry.source.id, entry.amount)
       |> Array.of_list,
     entries: [entry, ...t.entries]
-  };
+  }
 };
 
 let addEntry = (t: t, entry: Entry.t) : t => {
@@ -84,7 +84,16 @@ let addEntry = (t: t, entry: Entry.t) : t => {
     ...budget,
     entries:
       budget.entries
-      |> List.stable_sort((a: Entry.t, b: Entry.t) => b.date -. a.date |> int_of_float)
+      |> List.stable_sort(
+           (a: Entry.t, b: Entry.t) =>
+             if (b.date -. a.date > 0.) {
+               1
+             } else if (b.date -. a.date == 0.) {
+               0
+             } else {
+               (-1)
+             }
+         )
   }
 };
 
@@ -116,6 +125,16 @@ module JSON = {
              list(
                Entry.JSON.unmarshal(~accounts=accounts |> Array.to_list, ~recipients, ~categories)
              )
+           )
+        |> List.stable_sort(
+             (a: Entry.t, b: Entry.t) =>
+               if (b.date -. a.date > 0.) {
+                 1
+               } else if (b.date -. a.date == 0.) {
+                 0
+               } else {
+                 (-1)
+               }
            )
     }
   };
