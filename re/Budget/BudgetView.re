@@ -35,14 +35,20 @@ module CategoryItem = {
     );
   let c = ReasonReact.statelessComponent("BudgetView.CategoryItem");
   let make =
-      (~name: string, ~summary: Entry.entriesByCategory, _children) => {
+      (~name: string, ~monthlySummary: Entry.entriesByCategory, ~yearlySummary: Entry.entriesByCategory, _children) => {
     ...c,
     render: (_self) =>
       <View style=catStyles##wrapper>
         <Text value=name style=catStyles##name />
         <View style=styles##row>
-          <Text value=(Printf.sprintf("$%.2f", summary.total)) style=styles##bold />
+          <Text value=(Printf.sprintf("$%.2f", monthlySummary.total)) style=styles##bold />
           <Text value=" spent this month" style=styles##spent />
+        </View>
+        <View style=styles##row>
+          <Text style=styles##small>
+            <Text value=(Printf.sprintf("$%.2f", yearlySummary.total)) style=styles##bold />
+            <Text value=" spent this year" style=styles##spent />
+          </Text>
         </View>
       </View>
   };
@@ -59,6 +65,7 @@ let make = (~budget: Budget.t, ~nav, _children) => {
     budget.categories |> List.fold_left((sum: float, i: Category.t) => sum +. i.amount, 0.);
   let yearTotal = entriesByYear |> List.fold_left((sum, i: Entry.t) => sum +. i.amount, 0.);
   let mc = entriesByMonth |> Entry.byCategory;
+  let yc = entriesByYear |> Entry.byCategory;
   {
     ...c,
     render: (_self) =>
@@ -113,7 +120,7 @@ let make = (~budget: Budget.t, ~nav, _children) => {
             expenditure and if so render a category block for these
            **/
           (switch ((mc |> List.hd).id) {
-            | None => <CategoryItem name="Uncategorized items" summary=(mc |> List.hd) />
+            | None => <CategoryItem name="Uncategorized items" monthlySummary=(mc |> List.hd) yearlySummary=(yc |> List.hd) />
             | _ => ReasonReact.nullElement
           })
 
@@ -122,12 +129,17 @@ let make = (~budget: Budget.t, ~nav, _children) => {
             |> List.map(
                  (c: Category.t) => {
                    /** Find the entries for this category as provided by Entry.byCategory above **/
-                   let summary =
+                   let monthlySummary =
                      switch (mc |> List.find((i: Entry.entriesByCategory) => i.id == Some(c.id))) {
                      | exception Not_found => {id: Some(c.id), entries: [], total: 0.}
                      | c => c
                      };
-                   <CategoryItem name=c.name key=c.id summary />
+                   let yearlySummary =
+                     switch (yc |> List.find((i: Entry.entriesByCategory) => i.id == Some(c.id))) {
+                     | exception Not_found => {id: Some(c.id), entries: [], total: 0.}
+                     | c => c
+                     };
+                   <CategoryItem name=c.name key=c.id monthlySummary yearlySummary />
                  }
                )
             |> Array.of_list
