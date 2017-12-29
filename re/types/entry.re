@@ -65,7 +65,7 @@ let rec _takeByTime = (~l: list(t), ~startTime: float, ~endTime: float, ~ret: li
        **/
     (
       if (head.date < startTime) {
-        _takeByTime(~l, ~startTime, ~endTime, ~ret)
+        _takeByTime(~l=rest, ~startTime, ~endTime, ~ret)
       } else if (head.date > endTime) {
         ret
       } else {
