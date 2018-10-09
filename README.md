@@ -1,3 +1,10 @@
-Bugs
+## Example ReasonML + React Native app
 
-- onEndEditing isn't called when submitting new entries.  This means that if the recipient text box is not blurred when save is hit a recipient will not be created. 
+This is an exmaple budgeting app using:
+
+- ReasonML
+- ReasonReact
+- React Native
+- Custom reasonml <> react native bindings
+
+I'll get back to this when I have time.
